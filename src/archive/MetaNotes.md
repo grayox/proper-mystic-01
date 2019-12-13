@@ -1,4 +1,11 @@
 [Load to Heroku](https://dashboard.heroku.com/apps/nuns-playing-monopoly/deploy/heroku-git)
+  heroku create nuns-playing-monopoly
+    heroku create nuns-playing-monopoly --buildpack heroku/nodejs
+  heroku buildpacks:set heroku/nodejs
+    heroku buildpacks:remove heroku/nodejs
+  git add .
+  git commit -m "first commit"
+  git push heroku master
 
 [HEROKU]
 *weekly - sun*

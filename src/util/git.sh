@@ -41,7 +41,7 @@ cd "v$new"
 #       # and will cause the following error: this operation must be run in a work tree
 #       # so use the following command instead (without the --bare flag)
 git init # initialize new git
-# git remote add origin https://github.com/grayox/desert-hawk-03 # sets first origin
+# git remote add origin https://github.com/grayox/proper-mystic-01 # sets first origin
 git remote add origin "$remoterepo-$new" # sets first origin
 #   $ git remote -v    # double checks new remote directory location has been set correctly
 #   --- continue here with backup operations ---
