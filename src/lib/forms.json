@@ -1,0 +1,25 @@
+{
+  "contact": [
+    "contact", "contactus", "contact_us", "contact-us",
+               "contactUs", "contact_Us", "contact-Us",
+    "Contact", "Contactus", "Contact_us", "Contact-us",
+               "ContactUs", "Contact_Us", "Contact-Us"
+  ],
+  "comments": {
+    "comment1": "string.toLowerCase().includes() will convert to case-insensitivity",
+    "comment2": "css selectors: `form input[name=address]` or `form input[name^=first]`, etc",
+    "comment3": "Or, use logic: count name fields, if one, use full name, if two split first, last",
+    "comment4": "Test using just first letter of each attribute value",
+    "firstName": ["first", "fname", "f_", "f-", "namef", "name_f", "name-f", "nameF", "name_F", "name-F"], 
+    "lastName": ["last", "lname", "l_", "l-", "namel", "name_l", "name-l", "nameL", "name_L", "name-L"]
+  },
+  "form": {
+    "name": ["name"],
+    "address": ["address"],
+    "city": ["city"],
+    "state": ["state"],
+    "zip": ["zip"],
+    "phone": ["phone", "tel"],
+    "email": ["email"]
+  }
+}

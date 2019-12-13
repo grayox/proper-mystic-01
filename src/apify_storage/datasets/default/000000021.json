@@ -1,0 +1,5 @@
+{
+  "title": "Simple Dynamic Strings library for C, compatible with null-terminated strings",
+  "rank": "21.",
+  "href": "https://github.com/antirez/sds"
+}

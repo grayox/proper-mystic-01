@@ -1,0 +1,72 @@
+{
+  "source": "https://20somethingfinance.com/how-to-send-text-messages-sms-via-email-for-free/",
+  "comment": "txt.att.net means actual number is number@txt.att.net",
+  "carriers": {
+    "att": {
+      "sms": "txt.att.net",
+      "mms": "mms.att.net"
+    },
+    "boostMobile": {
+      "sms": "sms.myboostmobile.com",
+      "mms": "myboostmobile.com"
+    },
+    "consumerCellular": {
+      "sms": "mailmymobile.net",
+      "mms": "mailmymobile.net"
+    },
+    "cricket": {
+      "sms": "sms.cricketwireless.net",
+      "mms": "mms.cricketwireless.net"
+    },
+    "cSpire": {
+      "sms": "cspire1.com",
+      "mms": "cspire1.com"
+    },
+    "googleFi": {
+      "sms": "msg.fi.google.com",
+      "mms": "msg.fi.google.com"
+    },
+    "metroPcs": {
+      "sms": "mymetropcs.com",
+      "mms": "mymetropcs.com"
+    },
+    "pagePlus": {
+      "sms": "vtext.com",
+      "mms": "vtext.com"
+    },
+    "republicWireless": {
+      "sms": "text.republicwireless.com"
+    },
+    "sprint": {
+      "sms": "messaging.sprintpcs.com",
+      "mms": "pm.sprint.com"
+    },
+    "ting": {
+      "sms": "message.ting.com",
+      "mms": "message.ting.com"
+    },
+    "tmobile": {
+      "sms": "tmomail.net",
+      "mms": "tmomail.net"
+    },
+    "tracfone": {
+      "mms": "mmst5.tracfone.com"
+    },
+    "usCellular": {
+      "sms": "email.uscc.net",
+      "mms": "mms.uscc.net"
+    },
+    "verizon": {
+      "sms": "vtext.com",
+      "mms": "vzwpix.com"
+    },
+    "virginMobile": {
+      "sms": "vmobl.com",
+      "mms": "vmpix.com"
+    },
+    "xfinityMobile": {
+      "sms": "vtext.com",
+      "mms": "mypixmessages.com"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "url": "https://news.ycombinator.com/news?p=11",
+    "loadedUrl": null,
+    "uniqueKey": "https://news.ycombinator.com/news?p=11",
+    "method": "GET",
+    "payload": null,
+    "noRetry": false,
+    "retryCount": 0,
+    "errorMessages": null,
+    "headers": {},
+    "userData": {},
+    "handledAt": null,
+    "id": "lGbhhYCDgLU5Kxr"
+}
