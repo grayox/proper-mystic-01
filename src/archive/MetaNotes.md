@@ -1,14 +1,25 @@
 [Load to Heroku](https://dashboard.heroku.com/apps/nuns-playing-monopoly/deploy/heroku-git)
+  <!-- creat app -->
   heroku create nuns-playing-monopoly
     heroku create nuns-playing-monopoly --buildpack heroku/nodejs
   heroku buildpacks:set heroku/nodejs
     heroku buildpacks:remove heroku/nodejs
+  <!-- deploy app -->
   git add .
   git commit -m "first commit"
   git push heroku master
+  <!-- test tasks -->
+  heroku run node auction
+  heroku run node google
+  heroku run node contact
+  heroku run node formGet
+  heroku run node formPost
+  <!-- schedule tasks -->
+  <!-- https://devcenter.heroku.com/articles/scheduler -->
+  heroku addons:create scheduler:standard
 
 [HEROKU]
-*weekly - sun*
+*daily* `[ 'saturday', ]`
 1. Get source auction data
    a. Run `Puppeteer/src/auction.js` (`node auction`)
    b. Posts data to:
@@ -17,7 +28,7 @@
       ii) `if(isWrite2db)` -> Firestore
 
 [GAS]
-*weekly +hourly - sun*
+*hourly* `[ 'sunday', ]`
 2. Order field reports
    a. Run `GAS/FetchInventory.js`
    b. Look for auctions starting within one week.
@@ -26,7 +37,7 @@
    e. They will sit in queue and have chron jobs process them via GAS timed triggers.
 
 [GAS]
-*weekly +hourly - mon*
+*hourly* `[ 'monday', 'tuesday', ]`
 3. Create Q-Reports
    a. Run `GAS/CreateQ.js` to create Q-Reports.
    b. `CreateQ` calls `Shopify`, `Slides` and `Youtube`.

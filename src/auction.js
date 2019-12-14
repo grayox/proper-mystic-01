@@ -9,6 +9,7 @@ const _ = require('lodash'); // npm i lodash -s
 const arrayOfObjects2csv = require('./util/json2csv');
 const write2gas = require('./lib/db/write2gas');
 const write2db = require('./lib/db/write2firestore');
+const scheduler = require('./util/scheduler'); if(!scheduler(['sunday',])) return;
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 

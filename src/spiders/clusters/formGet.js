@@ -13,7 +13,7 @@ const { Cluster } = require('puppeteer-cluster');
 
 const admin = require('firebase-admin');
 const serviceAccount = require('../../../lib/db/serviceAcctKey.json');
-const write2db = require('../../../lib/db/write2firestore');
+const write2db = require('../../lib/db/write2firestore');
 
 // const collection = 'markets';
 // const doc = 'us-va-richmond';
