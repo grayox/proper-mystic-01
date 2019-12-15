@@ -14,6 +14,9 @@ const { Cluster } = require('puppeteer-cluster');
 const admin = require('firebase-admin');
 const serviceAccount = require('../../../lib/db/serviceAcctKey.json');
 const write2db = require('../../../lib/db/write2firestore');
+const isScheduled = require('./util/scheduler');
+
+const scriptName = 'contact';
 
 // const collection = 'markets';
 // const doc = 'us-va-richmond';
@@ -64,6 +67,8 @@ const pageFunction = items => { // items.length;
 }
 
 (async () => {
+  // schedule it
+  if(!isScheduled(scriptName)) return;
 
   // fetching a list from a doc
   // // [START] fetch data

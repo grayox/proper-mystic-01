@@ -3,6 +3,9 @@
 // https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
 const puppeteer = require('puppeteer'); // npm i puppeteer -s
 const write2db = require('../../../lib/db/write2firestore');
+const isScheduled = require('./util/scheduler');
+
+const scriptName = 'formPost';
 
 const waitUntilLoad = { waitUntil: 'load', };
 const headful = { headless: false, };
@@ -40,6 +43,9 @@ const dbData = {
 };
 
 (async () => {
+  // schedule it
+  if(!isScheduled(scriptName)) return;
+
   const browser = await puppeteer.launch(headful);
   // const version = browser.version();
   // console.log(browserVersion, version,);

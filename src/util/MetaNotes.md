@@ -6,8 +6,9 @@
     heroku buildpacks:remove heroku/nodejs
   <!-- deploy app -->
   git add .
-  git commit -m "first commit"
+  git commit -m "update"
   git push heroku master
+  git add . && git commit -m "update" && git push heroku master
   <!-- test tasks -->
   heroku run node auction
   heroku run node google
@@ -18,8 +19,8 @@
   <!-- https://devcenter.heroku.com/articles/scheduler -->
   heroku addons:create scheduler:standard
 
-[HEROKU]
-*daily* `[ 'saturday', ]`
+[HEROKU] daily
+auction: [ 'saturday', ]
 1. Get source auction data
    a. Run `Puppeteer/src/auction.js` (`node auction`)
    b. Posts data to:
@@ -27,8 +28,8 @@
       `https://docs.google.com/spreadsheets/d/1xRuSpW8v3zki6jyC0M9NJMAbua5UYjJgevUO5FI0ezI/edit#gid=471486619`
       ii) `if(isWrite2db)` -> Firestore
 
-[GAS]
-*hourly* `[ 'sunday', ]`
+[GAS] hourly
+FetchInventory: [ 'sunday', ]
 2. Order field reports
    a. Run `GAS/FetchInventory.js`
    b. Look for auctions starting within one week.
@@ -36,29 +37,29 @@
    d. Upon receipt of *Field Reports*, do nothing.
    e. They will sit in queue and have chron jobs process them via GAS timed triggers.
 
-[GAS]
-*hourly* `[ 'monday', 'tuesday', ]`
+[GAS] hourly
+CreateQ: [ 'monday', 'tuesday', ],
 3. Create Q-Reports
    a. Run `GAS/CreateQ.js` to create Q-Reports.
    b. `CreateQ` calls `Shopify`, `Slides` and `Youtube`.
 
-[HEROKU]
-*daily (+0h)* 
+[HEROKU] daily
+google: [ 'friday', 'sunday', ]
 4. Google for buyers online domains
    a. Run `Puppeteer/src/google.js` (`node google`)
 
-[HEROKU]
-*8hrs (+1h)* 
+[HEROKU] daily
+contact: [ 'sunday', 'tuesday', ]
 5. Fetch and store links to contact pages for each domain
    a. Run `Puppeteer/src/util/spiders/clusters/contact.js` (`node contact`)
 
-[HEROKU]
-*8hrs (+2h)* 
+[HEROKU] daily
+formGet: [ 'saturday', 'monday', ]
 6. Fetch and store site form structure data for each domain
    a. Run `Puppeteer/src/util/spiders/clusters/formGet.js` (`node formGet`)
 
-[HEROKU]
-*hourly*
+[HEROKU] daily
+formPost: [ 'tuesday', ]
 7. Post to buyer online forms
    a. `Puppeteer/src/form.js`  (`node formPost`)
 

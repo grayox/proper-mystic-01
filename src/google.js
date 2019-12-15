@@ -9,6 +9,9 @@ const scrapeUrls = require('./util/scrapeUrls');
 const processResults = require('./util/processResults');
 const getLocationIndex = require('./util/locationIndex');
 const write2db = require('./lib/db/write2firestore');
+const isScheduled = require('./util/scheduler');
+
+const scriptName = 'google';
 
 // other utils
 // 1. -X- find lat, long of city
@@ -54,6 +57,8 @@ const dbConfig = {
 // return;
 
 (async () => {
+  // schedule it
+  if(!isScheduled(scriptName)) return;
 
   // const value = 'value';
   // const enter = 'Enter';
