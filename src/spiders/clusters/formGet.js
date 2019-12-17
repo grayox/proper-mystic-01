@@ -12,9 +12,9 @@ const { Cluster } = require('puppeteer-cluster');
 // const puppeteer = require('puppeteer');
 
 const admin = require('firebase-admin');
-const serviceAccount = require('../../../lib/db/serviceAcctKey.json');
+const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 const write2db = require('../../lib/db/write2firestore');
-const isScheduled = require('./util/scheduler');
+const isScheduled = require('../../util/scheduler');
 
 const scriptName = 'formGet';
 
@@ -24,6 +24,11 @@ const queryFilter = {
   collection: 'domains',
   limit: 25,
   filters: [
+    // {
+    //   field: 'isTest',
+    //   operator: '==',
+    //   value: true,
+    // },
     {
       field: 'hasContactUrls',
       operator: '==',
@@ -105,7 +110,7 @@ const pageFunction = items => { // items.length;
 
 (async () => {
   // schedule it
-  if(!isScheduled(scriptName)) return;
+  // if(!isScheduled(scriptName)) return;
 
   // fetching a list from a doc
   // // [START] fetch data
@@ -182,6 +187,7 @@ const pageFunction = items => { // items.length;
     concurrency: Cluster.CONCURRENCY_CONTEXT,
     maxConcurrency: MAX_CONCURRENCY,
     monitor: true,
+    // timeout: 30000, // 30000 default
   });
 
   // // Extracts document.title of the crawled pages
@@ -198,13 +204,13 @@ const pageFunction = items => { // items.length;
     const values = await page.$$eval( selector, pageFunction, );
     console.log( url, values, );
 
-    // [BEGIN] write to db
-    const dbData = {
-      // url, contactUrlList: values,
-      url, formFieldList: values,
-    };
-    write2db({ dbConfig, data: dbData, });
-    // [END] write to db
+    // // [BEGIN] write to db
+    // const dbData = {
+    //   // url, contactUrlList: values,
+    //   url, formFieldList: values,
+    // };
+    // write2db({ dbConfig, data: dbData, });
+    // // [END] write to db
     
   });
 

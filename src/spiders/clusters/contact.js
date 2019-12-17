@@ -12,9 +12,9 @@ const { Cluster } = require('puppeteer-cluster');
 // const puppeteer = require('puppeteer');
 
 const admin = require('firebase-admin');
-const serviceAccount = require('../../../lib/db/serviceAcctKey.json');
-const write2db = require('../../../lib/db/write2firestore');
-const isScheduled = require('./util/scheduler');
+const serviceAccount = require('../../lib/db/serviceAcctKey.json');
+const write2db = require('../../lib/db/write2firestore');
+const isScheduled = require('../../util/scheduler');
 
 const scriptName = 'contact';
 
@@ -142,6 +142,7 @@ const pageFunction = items => { // items.length;
     concurrency: Cluster.CONCURRENCY_CONTEXT,
     maxConcurrency: MAX_CONCURRENCY,
     monitor: true,
+    // timeout: 30000, // 30000 default
   });
 
   // // Extracts document.title of the crawled pages

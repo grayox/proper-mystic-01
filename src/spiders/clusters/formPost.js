@@ -1,67 +1,160 @@
-// refs
-// https://blog.antoine-augusti.fr/2019/08/submit-form-puppeteer/
-// https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
-const puppeteer = require('puppeteer'); // npm i puppeteer -s
-const write2db = require('../../../lib/db/write2firestore');
-const isScheduled = require('./util/scheduler');
+// https://github.com/thomasdondorf/puppeteer-cluster
+// https://stackoverflow.com/a/51989560
+// https://stackoverflow.com/a/50049555
+
+// example:
+// https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/alexa-1m.js
+
+// You need to download the Alexa 1M from http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+// and unzip it into this directory
+
+const { Cluster } = require('puppeteer-cluster');
+// const puppeteer = require('puppeteer');
+
+const admin = require('firebase-admin');
+const postDetail = require('./postDetail'); // posts to form
+const serviceAccount = require('../../lib/db/serviceAcctKey.json');
+// const write2db = require('../../lib/db/write2firestore');
+const isScheduled = require('../../util/scheduler');
 
 const scriptName = 'formPost';
 
-const waitUntilLoad = { waitUntil: 'load', };
-const headful = { headless: false, };
+// date calculations
+const daysToGoBack = 5;
+const milSecMultiplier = 1000 * 60 * 60 * 24;
+const timestamp = Date.now();
+// timestamp
+const offset = daysToGoBack * milSecMultiplier;
+// offset
+const maxDate = timestamp - offset;
+// maxDate
 
-const url = 'https://www.kshamasawant.org/';
-const selector1 = 'form #signup_email';
-const value1 = 'homebuyerrichmond@gmail.com';
-const selector2 = 'form #signup_mobile_number';
-const value2 = '804.399.9337';
-// const enter = 'Enter';
-// const browserVersion = 'browser version:';
-const newPageLogHeader = 'New Page URL:';
-
-const dbConfig = {
-  source: 'form',
-  formList: {
-    collection: 'currentForm',
-    doc: domainName, // 'rvahomebuyers,com'
-  },
-  // parsedUrls: {
-  //   collection: 'domains',
-  //   // docs: , // domainList (later)
-  // },
-};
-
-const dbData = {
-  formList: [
+// const collection = 'markets';
+// const doc = 'us-va-richmond';
+const queryFilter = {
+  collection: 'domains',
+  limit: 25,
+  filters: [
+    // {
+    //   field: 'isTest',
+    //   operator: '==',
+    //   value: true,
+    // },
     {
-      url: domainName,
-      isCurrent,
-      currentMarket,
-      currentAddress,
+      field: 'hasContactUrls',
+      operator: '==',
+      value: true,
+    }, {
+      field: 'hasFormFields',
+      operator: '==',
+      value: true,
+    }, {
+      field: 'latestPosting',
+      operator: '<',
+      value: maxDate,
     },
   ],
-};
+}
+
+const MAX_CONCURRENCY = 5;
 
 (async () => {
   // schedule it
-  if(!isScheduled(scriptName)) return;
+  // if(!isScheduled(scriptName)) return;
 
-  const browser = await puppeteer.launch(headful);
-  // const version = browser.version();
-  // console.log(browserVersion, version,);
-  const page = await browser.newPage();
+  // fetching a list from a doc
+  // // [START] fetch data
+  // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
+  // admin.initializeApp({
+  //   credential: admin.credential.cert(serviceAccount)
+  // });
+  // const db = admin.firestore();
+  // const marketRef = db
+  //   .collection(collection)
+  //   .doc(doc);
+  // const domains = await marketRef.get()
+  //   .then( doc => {
+  //     if (!doc.exists) {
+  //       console.log('No such document!');
+  //     } else {
+  //       const data = doc.data();
+  //       // console.log('Document data:', data,);
+  //       const { domainList, } = data;
+  //       return domainList;
+  //     }
+  //   })
+  //   .catch(err => {
+  //     console.log('Error getting document', err);
+  //   });
+  // // console.log('domains', domains,);
+  // // return;
+  // // [END] fetch data
 
-  await page.goto( url , waitUntilLoad , );
+  // fetching a collection subset with a query
+  // [START] fetch data
+  // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_multiple_documents_from_a_collection
+  // const { collection, field, operator, value, limit, } = queryFilter;
+  const { collection, filters, limit, } = queryFilter;
+  
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  const db = admin.firestore();
+  const collectionRef = db.collection(collection);
+  const query = await collectionRef
+    // .where('capital', '==', true)
+    // .where( 'hasContactUrls', '==', false, )
+    // .where( field, operator, value, )
+    .where( filters[0].field, filters[0].operator, filters[0].value, )
+    .where( filters[1].field, filters[1].operator, filters[1].value, )
+    // .where( filters[2].field, filters[2].operator, filters[2].value, )
+    // // order and limit data
+    // // https://firebase.google.com/docs/firestore/query-data/order-limit-data#order_and_limit_data
+    // .orderBy('name')
+    // .limit(3)
+    .limit(limit)
+    .get()
+    .then( snapshot => {
+      if (snapshot.empty) {
+        console.log('No matching documents.');
+        return;
+      }
+      const out = [];
+      snapshot.forEach( doc => {
+        // console.log( doc.id, '=>', doc.data() );
+        out.push( doc.data() );
+      });
+      // const out = snapshot.map( doc => doc.data() ); // .map() not a function
+      return out;
+    })
+    .catch( err => {
+      console.log('Error getting documents', err,);
+    });
+    // console.log( 'query', query, );
+    // console.log( 'query', JSON.stringify(query, null, 2,), );
+    // return;
+  // [END] fetch data
 
-  await page.type( selector1 , value1 , );
-  await page.type( selector2 , value2 , );
-  // await page.keyboard.press(enter);
-  // await page.$eval('form', form => form.submit());
+  const cluster = await Cluster.launch({
+    concurrency: Cluster.CONCURRENCY_CONTEXT,
+    maxConcurrency: MAX_CONCURRENCY,
+    monitor: true,
+    // timeout: 30000, // 30000 default
+  });
 
-  await page.waitForNavigation();
-  console.log( newPageLogHeader, page.url(), );
-  await browser.close();
+  // In case of problems, log them
+  cluster.on('taskerror', (err, data,) => {
+    console.log(`  Error crawling ${data}: ${err.message}`);
+  });
 
-  await write2db({ dbConfig, dbData, });
-  return;
+  // for prior versions, see formGet
+  const length = query.length;
+  let i = length; while(i--) {
+    const item = query[i];
+    // console.log('item', item,);
+    cluster.queue(item, postDetail,); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
+  }
+
+  await cluster.idle();
+  await cluster.close();
 })();

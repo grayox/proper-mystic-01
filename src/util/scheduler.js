@@ -3,18 +3,18 @@
 // This utility provides finer grained controls for running weekly on a specific day, etc.
 
 const config = {
-  auction  : [], // [ /* 'sunday',    'monday',    'tuesday',    'wednesday', 'thursday',    'friday', */ 'saturday',    ] ,
-  google   : [], // [    'sunday', /* 'monday',    'tuesday',    'wednesday', 'thursday', */ 'friday', /* 'saturday', */ ] ,
-  contact  : [], // [    'sunday', /* 'monday', */ 'tuesday', /* 'wednesday', 'thursday',    'friday',    'saturday', */ ] ,
-  formGet  : [], // [ /* 'sunday', */ 'monday', /* 'tuesday',    'wednesday', 'thursday',    'friday', */ 'saturday',    ] ,
-  formPost : [], // [ /* 'sunday',    'monday', */ 'tuesday', /* 'wednesday', 'thursday',    'friday',    'saturday', */ ] ,
+  auction  : [ /* 'sunday',    'monday',    'tuesday',    'wednesday', 'thursday',    'friday', */ 'saturday',    ] ,
+  google   : [    'sunday', /* 'monday',    'tuesday',    'wednesday', 'thursday', */ 'friday', /* 'saturday', */ ] ,
+  contact  : [    'sunday', /* 'monday', */ 'tuesday', /* 'wednesday', 'thursday',    'friday',    'saturday', */ ] ,
+  formGet  : [ /* 'sunday', */ 'monday', /* 'tuesday',    'wednesday', 'thursday',    'friday', */ 'saturday',    ] ,
+  formPost : [ /* 'sunday',    'monday', */ 'tuesday', /* 'wednesday', 'thursday',    'friday',    'saturday', */ ] ,
 };
 
 const daysOfWeek = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', ];
 const date = new Date();
-const today = date.getUTCDay();
+const today = date.getUTCDay(); // 6
 // today
-const dayOfWeek = daysOfWeek[today];
+const dayOfWeek = daysOfWeek[today]; // 'saturday'
 // dayOfWeek
 
 // returns true if argument (array of days) includes the current day (today)
