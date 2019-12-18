@@ -57,22 +57,41 @@ const getWrite2db = () => {
   write2db({ dbConfig, data: dbData, });
 }
 
-const config = {
-  address: '123 Main St',
-  'line 1': '123 Main St',
-  'line 2': 'Anytown, VA 98023',
-  city: 'Anytown',
-  state: 'VA',
-  zip: '98023',
-  phone: '5555559999',
-  email: 'myemail@example.com',
-  name: 'John Doe',
-  first: 'John',
-  last: 'Doe',
-};
+// const config = {
+//   address: '123 Main St',
+//   'line 1': '123 Main St',
+//   'line 2': 'Anytown, VA 98023',
+//   city: 'Anytown',
+//   state: 'VA',
+//   zip: '98023',
+  
+//   phone: '5555559999',
+//   email: 'myemail@example.com',
+//   name: 'John Doe',
+//   first: 'John',
+//   last: 'Doe',
+// };
 
-const getValue = label => {
-  let out = '';
+const getValue = (
+  label,
+  {
+    listAddress: address,
+    listCity: city,
+    listState: state,
+    listZip: zip,
+  }, {
+    first, last, phone, email,
+  },
+) => {
+  const joiner = ', ';
+  const empty = '';
+  const config = {
+    address, city, state, zip,
+    first, last, phone, email,
+    'line 1': address,
+    'line 2': [ city, state, zip, ].join(joiner),
+  };
+  let out = empty;
   const lowered = label.toLowerCase();
   for (let key in config) {
     if(lowered.includes(key)) {
@@ -93,7 +112,13 @@ const getValue = label => {
   // [END] test
 }
 
-module.exports = async ({ page, data: { domain, formFieldList, }}) => {
+module.exports = async ({
+  page,
+  data: {
+    queryDomain: { domain, formFieldList, },
+    queryInventory, queryContactDetails,
+  },
+}) => {
   // schedule it
   // if(!isScheduled(scriptName)) return;
 
@@ -112,15 +137,15 @@ module.exports = async ({ page, data: { domain, formFieldList, }}) => {
   // await page.goto( url , waitUntilLoad , );
   await page.goto( url , waiter , );
 
-  await page.type( selector1 , value1 , );
-  await page.type( selector2 , value2 , );
+  // await page.type( selector1 , value1 , );
+  // await page.type( selector2 , value2 , );
 
   for (let field of formFieldList) {
     const { id, label, } = field;
     const selectorPrefix = 'form';
     const selectorJoiner = ' #';
     const selector = [ selectorPrefix, id, ].join(selectorJoiner);
-    const value = getValue(label);
+    const value = getValue(label, queryInventory, queryContactDetails,);
     await page.type( selector , value , );
   }
 

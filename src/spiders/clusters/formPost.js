@@ -19,48 +19,46 @@ const isScheduled = require('../../util/scheduler');
 
 const scriptName = 'formPost';
 
-// date calculations
-const daysToGoBack = 5;
-const milSecMultiplier = 1000 * 60 * 60 * 24;
-const timestamp = Date.now();
-// timestamp
-const offset = daysToGoBack * milSecMultiplier;
-// offset
-const maxDate = timestamp - offset;
-// maxDate
-
-// const collection = 'markets';
-// const doc = 'us-va-richmond';
-const queryFilter = {
-  collection: 'domains',
-  limit: 25,
-  filters: [
-    // {
-    //   field: 'isTest',
-    //   operator: '==',
-    //   value: true,
-    // },
-    {
-      field: 'hasContactUrls',
-      operator: '==',
-      value: true,
-    }, {
-      field: 'hasFormFields',
-      operator: '==',
-      value: true,
-    }, {
-      field: 'latestPosting',
-      operator: '<',
-      value: maxDate,
-    },
-  ],
-}
-
 const MAX_CONCURRENCY = 5;
 
-(async () => {
-  // schedule it
-  // if(!isScheduled(scriptName)) return;
+const getDbDomains = async db => {
+
+  // date calculations
+  const daysToGoBack = 5;
+  const milSecMultiplier = 1000 * 60 * 60 * 24;
+  const timestamp = Date.now();
+  // timestamp
+  const offset = daysToGoBack * milSecMultiplier;
+  // offset
+  const maxDate = timestamp - offset;
+  // maxDate
+  
+  // const collection = 'markets';
+  // const doc = 'us-va-richmond';
+  const queryFilter = {
+    collection: 'domains',
+    limit: 25,
+    filters: [
+      // {
+      //   field: 'isTest',
+      //   operator: '==',
+      //   value: true,
+      // },
+      {
+        field: 'hasContactUrls',
+        operator: '==',
+        value: true,
+      }, {
+        field: 'hasFormFields',
+        operator: '==',
+        value: true,
+      }, {
+        field: 'latestPosting',
+        operator: '<',
+        value: maxDate,
+      },
+    ],
+  }
 
   // fetching a list from a doc
   // // [START] fetch data
@@ -95,11 +93,6 @@ const MAX_CONCURRENCY = 5;
   // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_multiple_documents_from_a_collection
   // const { collection, field, operator, value, limit, } = queryFilter;
   const { collection, filters, limit, } = queryFilter;
-  
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  const db = admin.firestore();
   const collectionRef = db.collection(collection);
   const query = await collectionRef
     // .where('capital', '==', true)
@@ -134,6 +127,137 @@ const MAX_CONCURRENCY = 5;
     // console.log( 'query', JSON.stringify(query, null, 2,), );
     // return;
   // [END] fetch data
+  return query;
+}
+
+const getDbInventory = async db => {
+  const queryFilter = {
+    collection: 'inventory',
+    limit: 1,
+    filters: [
+      // {
+      //   field: 'isTest',
+      //   operator: '==',
+      //   value: true,
+      // },
+      // {
+      //   field: 'hasContactUrls',
+      //   operator: '==',
+      //   value: true,
+      // }, {
+      //   field: 'hasFormFields',
+      //   operator: '==',
+      //   value: true,
+      // }, {
+      //   field: 'latestPosting',
+      //   operator: '<',
+      //   value: maxDate,
+      // },
+    ],
+  };
+  const { collection, filters, limit, } = queryFilter;
+  const collectionRef = db.collection(collection);
+  const query = await collectionRef
+    // .where('capital', '==', true)
+    // .where( 'hasContactUrls', '==', false, )
+    // .where( field, operator, value, )
+    // .where( filters[0].field, filters[0].operator, filters[0].value, )
+    // .where( filters[1].field, filters[1].operator, filters[1].value, )
+    // .where( filters[2].field, filters[2].operator, filters[2].value, )
+    // // order and limit data
+    // // https://firebase.google.com/docs/firestore/query-data/order-limit-data#order_and_limit_data
+    // .orderBy('name')
+    // .limit(3)
+    .limit(limit)
+    .get()
+    .then( snapshot => {
+      if (snapshot.empty) {
+        console.log('No matching documents.');
+        return;
+      }
+      const out = [];
+      snapshot.forEach( doc => {
+        // console.log( doc.id, '=>', doc.data() );
+        out.push( doc.data() );
+      });
+      // const out = snapshot.map( doc => doc.data() ); // .map() not a function
+      return out;
+    })
+    .catch( err => {
+      console.log('Error getting documents', err,);
+    });
+  
+    return query;
+}
+
+const getDbContactDetails = async db => {
+  const queryFilter = {
+    collection: 'contacts',
+    limit: 1,
+    filters: [
+      // {
+      //   field: 'isTest',
+      //   operator: '==',
+      //   value: true,
+      // },
+      // {
+      //   field: 'hasContactUrls',
+      //   operator: '==',
+      //   value: true,
+      // }, {
+      //   field: 'hasFormFields',
+      //   operator: '==',
+      //   value: true,
+      // }, {
+      //   field: 'latestPosting',
+      //   operator: '<',
+      //   value: maxDate,
+      // },
+    ],
+  };
+  const { collection, filters, limit, } = queryFilter;
+  const collectionRef = db.collection(collection);
+  const query = await collectionRef
+    // .where('capital', '==', true)
+    // .where( 'hasContactUrls', '==', false, )
+    // .where( field, operator, value, )
+    // .where( filters[0].field, filters[0].operator, filters[0].value, )
+    // .where( filters[1].field, filters[1].operator, filters[1].value, )
+    // .where( filters[2].field, filters[2].operator, filters[2].value, )
+    // // order and limit data
+    // // https://firebase.google.com/docs/firestore/query-data/order-limit-data#order_and_limit_data
+    // .orderBy('name')
+    // .limit(3)
+    .limit(limit)
+    .get()
+    .then( snapshot => {
+      if (snapshot.empty) {
+        console.log('No matching documents.');
+        return;
+      }
+      const out = [];
+      snapshot.forEach( doc => {
+        // console.log( doc.id, '=>', doc.data() );
+        out.push( doc.data() );
+      });
+      // const out = snapshot.map( doc => doc.data() ); // .map() not a function
+      return out;
+    })
+    .catch( err => {
+      console.log('Error getting documents', err,);
+    });
+  
+    return query;
+}
+
+(async () => {
+  // schedule it
+  // if(!isScheduled(scriptName)) return;
+  
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  const db = admin.firestore();
 
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
@@ -147,13 +271,27 @@ const MAX_CONCURRENCY = 5;
     console.log(`  Error crawling ${data}: ${err.message}`);
   });
 
-  // for prior versions, see formGet
-  const length = query.length;
-  let i = length; while(i--) {
-    const item = query[i];
-    // console.log('item', item,);
-    cluster.queue(item, postDetail,); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
-  }
+  const queryDomains = getDbDomains(db);
+  const queryInventory = getDbInventory(db);
+  const queryContactDetails = getDbContactDetails(db);
+
+  Promise.all([ queryDomains, queryInventory, queryContactDetails, ])
+    .then( values => {
+      // console.log(values);
+      const [ queryDomains, queryInventory, queryContactDetails, ] = values;
+
+      // for prior versions, see formGet
+      const length = queryDomains.length;
+      let i = length; while(i--) {
+        const item = {
+          queryDomain: queryDomains[i],
+          queryInventory, queryContactDetails,
+        };
+        // console.log('item', item,);
+        cluster.queue(item, postDetail,); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
+      }
+
+    });
 
   await cluster.idle();
   await cluster.close();
