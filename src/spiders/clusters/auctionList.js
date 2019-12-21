@@ -4,16 +4,16 @@
 
 // scrapes auction.com to send auction data to google sheets
 
-const puppeteer = require('puppeteer'); // npm i puppeteer -s
+// const puppeteer = require('puppeteer'); // npm i puppeteer -s
 const _ = require('lodash'); // npm i lodash -s
-const arrayOfObjects2csv = require('../util/json2csv');
-const write2gas = require('../lib/db/write2gas');
-const write2db = require('../lib/db/write2firestore');
-const isScheduled = require('../util/scheduler');
+const arrayOfObjects2csv = require('../../util/json2csv');
+const write2gas = require('../../lib/db/write2gas');
+const write2db = require('../../lib/db/write2firestore');
+const isScheduled = require('../../util/scheduler');
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 
-const scriptName = 'auction';
+const scriptName = 'auctionList';
 
 const dbConfig = {
   source: 'auction',
@@ -27,62 +27,58 @@ const dbConfig = {
   // },
 };
 
-const getMarket = ( city, state, country='us', ) => {
-  const splitter = ' ';
-  const joiner = '-';
-  const out1 = [ country, state, city, ].join(joiner);
-  const out2 = out1.split(splitter).join(joiner);
-  const out3 = out2.toLowerCase();
-  return out3;
-};
+// const getMarket = ( city, state, country='us', ) => {
+//   const splitter = ' ';
+//   const joiner = '-';
+//   const out1 = [ country, state, city, ].join(joiner);
+//   const out2 = out1.split(splitter).join(joiner);
+//   const out3 = out2.toLowerCase();
+//   return out3;
+// };
 
-const getUrl = ( city, state, ) => {
-  const cityJoiner = '_';
-  const joiner = '/';
-  const prefix = 'https://www.auction.com/residential';
-  const citySuffix = 'ct';
-  const suffix = 'active_lt/resi_sort_v2_st/y_nbs/';
-  const citySection = [ city, citySuffix, ].join(cityJoiner); // 'Danville_ct'
-  const out = [ prefix, state, citySection, suffix ].join(joiner);
-  return out; // 'https://www.auction.com/residential/VA/Danville_ct/active_lt/resi_sort_v2_st/y_nbs/'
-}
+// const getUrl = ( city, state, ) => {
+//   const cityJoiner = '_';
+//   const joiner = '/';
+//   const prefix = 'https://www.auction.com/residential';
+//   const citySuffix = 'ct';
+//   const suffix = 'active_lt/resi_sort_v2_st/y_nbs/';
+//   const citySection = [ city, citySuffix, ].join(cityJoiner); // 'Danville_ct'
+//   const out = [ prefix, state, citySection, suffix ].join(joiner);
+//   return out; // 'https://www.auction.com/residential/VA/Danville_ct/active_lt/resi_sort_v2_st/y_nbs/'
+//   // virginia // 'https://www.auction.com/residential/Virginia/active_lt/resi_sort_v2_st/y_nbs/
+//   // virginia // 'https://www.auction.com/residential/VA/active_lt/resi_sort_v2_st/y_nbs/
+//   // reserve  // 'https://www.auction.com/residential/VA/active_lt/resi_sort_v2_st/y_sr/y_nbs/'
+//   // page 2   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/2_cp/y_nbs/'
+//   // page 3   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/3_cp/y_nbs/'
+// }
 
-(async () => {
-  // schedule it
-  if(!isScheduled(scriptName)) return;
+const getUrl = ( abbreviation, pageNumber=1, ) =>
+  `https://www.auction.com/residential/${abbreviation}/active_lt/resi_sort_v2_st/y_sr/${pageNumber}_cp/y_nbs/`;
+  // city, st // 'https://www.auction.com/residential/VA/Danville_ct/active_lt/resi_sort_v2_st/y_nbs/'
+  // virginia // 'https://www.auction.com/residential/Virginia/active_lt/resi_sort_v2_st/y_nbs/
+  // virginia // 'https://www.auction.com/residential/VA/active_lt/resi_sort_v2_st/y_nbs/
+  // reserve  // 'https://www.auction.com/residential/VA/active_lt/resi_sort_v2_st/y_sr/y_nbs/'
+  // page 2   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/2_cp/y_nbs/'
+  // page 3   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/3_cp/y_nbs/'
 
-  // const xpath = '//h4';
-  // const xpath = '//div[@data-elm-id="asset_list_content"]';
-  // const xpath = '//div[@data-elm-id="asset_list_content"]/*';
-  // const applicationJson = 'application/json';
-  // const successMsg = 'The file was saved!';
-  // const filePath = './data/scrape.';
-  // const exts = {
-  //     json : 'json' ,
-  //     csv  : 'csv'  ,
-  //   };
-  // const filePathJson = [ filePath , exts.json , ].join('');
-  // const filePathCsv  = [ filePath , exts.csv  , ].join('');
-  // const url = 'https://www.auction.com/residential/danville,%20virginia_qs/active_lt/resi_sort_v2_st/y_nbs/' ; // danville, virginia (text)
-  // const url = 'https://www.auction.com/residential/North%20Carolina/active_lt/resi_sort_v2_st/y_nbs/'        ; // North Carolina (state)
-  // const url = 'https://www.auction.com/residential/Virginia/active_lt/resi_sort_v2_st/y_nbs/'                ; // Virginia (state)
-  // const url = 'https://www.auction.com/residential/Virginia/active_lt/resi_sort_v2_st/2_cp/y_nbs/'           ; // Virginia (state) (page 2)
-  // const url = 'https://www.auction.com/residential/VA/Danville_ct/active_lt/resi_sort_v2_st/y_nbs/'          ; // Danville, Virginia (city)
-  const isWrite2db = false;
-  const isWrite2gas = true;
-  const targetMarket = {
-    city: 'Greensboro',
-    state: 'NC',
-  };
-  const url    = getUrl    ( targetMarket.city , targetMarket.state , );
-  const market = getMarket ( targetMarket.city , targetMarket.state , );
+module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
+  // console.log('abbreviation', abbreviation,); return;
+
+  // // schedule it
+  // if(!isScheduled(scriptName)) return;
+
+  const isWrite2db = true;
+  const isWrite2gas = false;
+  const url = getUrl( abbreviation, );
+  // const market = [ 'us', abbreviation, ].join(joiner).toLowerCase();
   const source = 'auction.com';
-  const listTimestamp = Date.now();
+  const timestamp = Date.now();
   const splitDelimeter1 = ' ';
   const splitDelimeter2 = ', ';
   // const allCommas = /,*/g;
   const nonDigits = /\D*/g;
   const currencyChars = /(\$*,*)/g;
+  // const joiner = '-';
   const emptyString = '';
   const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
   const monthsArray = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', ];
@@ -198,15 +194,17 @@ const getUrl = ( city, state, ) => {
   // const AUCTION_START_TIME    = 'div[data-elm-id="auction_start_time_value"]' ; // 03:00 pm
   // const AUCTION_VENUE_ADDRESS = 'div[data-elm-id="venue_address"]'            ; // 401 Patton St., Danville, VA 24543
   
-  // ref: https://github.com/GoogleChrome/puppeteer
-  // cheatsheet: https://nitayneeman.com/posts/getting-to-know-puppeteer-using-practical-examples/
-  // forms: https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
-  const browser = await puppeteer.launch({ 
-    // headless: false, // uncomment when form testing for visual context and fedback
-  });
-  const page = await browser.newPage();
+  // // ref: https://github.com/GoogleChrome/puppeteer
+  // // cheatsheet: https://nitayneeman.com/posts/getting-to-know-puppeteer-using-practical-examples/
+  // // forms: https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
+  // const browser = await puppeteer.launch({ 
+  //   // headless: false, // uncomment when form testing for visual context and fedback
+  //   slowMo: 1000,
+  // });
+
+  // const page = await browser.newPage();
   // await page.goto('https://example.com');
-  await page.goto(url, {
+  await page.goto( url, {
     // waitUntil: 'load',
   });
   // docs: https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
@@ -243,7 +241,7 @@ const getUrl = ( city, state, ) => {
   // console.log( 'items\n'       , items        , );
   // console.log( 'items count: ' , items.length , );
 
-  await browser.close();
+  // await browser.close();
 
   const str2num = c => Number(c && c.replace(currencyChars, emptyString,)) || defaultResult;
   const titleCase = s => _.startCase(_.toLower(s));
@@ -266,7 +264,7 @@ const getUrl = ( city, state, ) => {
     const delimeter1 = ' ';
     let listAuctionDateMonthText = listAuctionDateTimestamp = listAuctionDateMonthNumber =
       listAuctionDateYear = listAuctionDateDay = listAuctionDateTime = defaultResult;
-    const todaysDate = new Date(listTimestamp);
+    const todaysDate = new Date(timestamp);
     const todaysMonth = todaysDate.getMonth();
     listAuctionDateYear = todaysDate.getFullYear();
     const defaultDate = {
@@ -364,9 +362,9 @@ const getUrl = ( city, state, ) => {
     const listSqft  = (item.listSqft  && str2num(item.listSqft)) || defaultResult;
     const out = {
       // meta data
-      source, market, listUrl: url,
+      timestamp, source, listUrl: url, // market,
       // basic facts
-      ...item, listTimestamp, listBeds, listBaths, listSqft,
+      ...item, listTimestamp: timestamp, listBeds, listBaths, listSqft,
       listAddress, listCity, listState, listZip, listCounty, // listCsz, listDetailUrl, 
       listForeclosureOrBankOwned, listInPersonOrOnline, listArv, listReserve, listOpeningBid,
       // time
@@ -396,7 +394,7 @@ const getUrl = ( city, state, ) => {
   }
   // [ END write to firestore db ]
 
-})();
+};
 
 // node scrape.js
 // curl -L --data-binary @data/scrape.csv https://script.google.com/macros/s/AKfycbyRT8_eiROa8oCVEQV0nX2bQpxcA4b9Eq2zGpp2LNW0p4ue37_G/exec

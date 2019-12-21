@@ -253,11 +253,6 @@ const getDbContactDetails = async db => {
 (async () => {
   // schedule it
   // if(!isScheduled(scriptName)) return;
-  
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  const db = admin.firestore();
 
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
@@ -267,31 +262,38 @@ const getDbContactDetails = async db => {
   });
 
   // In case of problems, log them
-  cluster.on('taskerror', (err, data,) => {
-    console.log(`  Error crawling ${data}: ${err.message}`);
+  cluster.on('taskerror', ( err, data, ) => {
+    console.log(`Error crawling ${data}: ${err.message}`);
   });
-
+  
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  const db = admin.firestore();
   const queryDomains = getDbDomains(db);
   const queryInventory = getDbInventory(db);
   const queryContactDetails = getDbContactDetails(db);
+  const queryData = await Promise.all([ queryDomains, queryInventory, queryContactDetails, ])
+    .then( values => values );
 
-  Promise.all([ queryDomains, queryInventory, queryContactDetails, ])
-    .then( values => {
-      // console.log(values);
-      const [ queryDomains, queryInventory, queryContactDetails, ] = values;
-
-      // for prior versions, see formGet
-      const length = queryDomains.length;
-      let i = length; while(i--) {
-        const item = {
-          queryDomain: queryDomains[i],
-          queryInventory, queryContactDetails,
-        };
-        // console.log('item', item,);
-        cluster.queue(item, postDetail,); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
-      }
-
-    });
+  // console.log('queryData', queryData,); // return;
+  const [ queryDomainsArray, queryInventoryArray, queryContactDetailsArray, ] = queryData; // queryDomains,
+  
+  // // for prior versions, see formGet
+  const length = queryDomainsArray.length;
+  // console.log('length', length,);
+  // console.log('typeof cluster', typeof cluster,);
+  let i = length; while(i--) {
+    const queryDomain = queryDomainsArray[i];
+    const queryInventory = queryInventoryArray[0];
+    const queryContactDetails = queryContactDetailsArray[0];
+    // console.log('typeof queryDomain', typeof queryDomain,);
+    // console.log('typeof queryInventory', typeof queryInventory,);
+    // console.log('typeof queryContactDetails', typeof queryContactDetails,);
+    const item = { queryDomain, queryInventory, queryContactDetails, };
+    // console.log('item', JSON.stringify(item),);
+    cluster.queue( item, postDetail, ); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
+  }
 
   await cluster.idle();
   await cluster.close();

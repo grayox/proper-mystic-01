@@ -2,7 +2,7 @@
 // https://blog.antoine-augusti.fr/2019/08/submit-form-puppeteer/
 // https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
 // const puppeteer = require('puppeteer'); // npm i puppeteer -s
-const write2db = require('../../lib/db/write2firestore');
+// const write2db = require('../../lib/db/write2firestore');
 // const isScheduled = require('../../util/scheduler');
 
 // const scriptName = 'postDetail';
@@ -13,30 +13,30 @@ const waiter = { waitUntil: 'domcontentloaded', };
 // const headful = { headless: false, };
 
 // const url = 'https://www.example.com/';
-const selector1 = 'form #signup_email';
-const value1 = 'mytestemail@example.com';
-const selector2 = 'form #signup_mobile_number';
-const value2 = '555.555.9999';
+// const selector1 = 'form #signup_email';
+// const value1 = 'mytestemail@example.com';
+// const selector2 = 'form #signup_mobile_number';
+// const value2 = '555.555.9999';
 // const enter = 'Enter';
 // const browserVersion = 'browser version:';
 const newPageLogHeader = 'New Page URL:';
 
-const dbConfig = {
-  source: 'form-post',
-  formFieldList: {
-    collection: 'domains',
-    // doc: formattedDomain, (later)
-  },
-  // source: 'auction',
-  // inventoryList: {
-  //   collection: 'inventory',
-  //   // doc: getLocationIndex(config), // 'us-va-virginia-beach'
-  // },
-  // parsedUrls: {
-  //   collection: 'domains',
-  //   // docs: , // domainList (later)
-  // },
-};
+// const dbConfig = {
+//   source: 'form-post',
+//   formFieldList: {
+//     collection: 'domains',
+//     // doc: formattedDomain, (later)
+//   },
+//   // source: 'auction',
+//   // inventoryList: {
+//   //   collection: 'inventory',
+//   //   // doc: getLocationIndex(config), // 'us-va-virginia-beach'
+//   // },
+//   // parsedUrls: {
+//   //   collection: 'domains',
+//   //   // docs: , // domainList (later)
+//   // },
+// };
 
 // const dbData = {
 //   formList: [
@@ -49,13 +49,13 @@ const dbConfig = {
 //   ],
 // };
 
-const getWrite2db = () => {
-  const dbData = {
-    // url, contactUrlList: values,
-    url, formFieldList: values,
-  };
-  write2db({ dbConfig, data: dbData, });
-}
+// const getWrite2db = () => {
+//   const dbData = {
+//     // url, contactUrlList: values,
+//     url, formFieldList: values,
+//   };
+//   write2db({ dbConfig, data: dbData, });
+// }
 
 // const config = {
 //   address: '123 Main St',
@@ -89,7 +89,7 @@ const getValue = (
     address, city, state, zip,
     first, last, phone, email,
     'line 1': address,
-    'line 2': [ city, state, zip, ].join(joiner),
+    'line 2': [ city , state , zip , ].join(joiner),
   };
   let out = empty;
   const lowered = label.toLowerCase();
@@ -113,7 +113,7 @@ const getValue = (
 }
 
 module.exports = async ({
-  page,
+  // page, data,
   data: {
     queryDomain: { domain, formFieldList, },
     queryInventory, queryContactDetails,
@@ -129,10 +129,15 @@ module.exports = async ({
   // const page = await browser.newPage();
   // [END] include if stand-alone (not exported to puppeteer-clusters)
 
+  // console.log('data', data,);
+  // console.log('domain', domain,);
+  // console.log('formFieldList', formFieldList,);
+  // console.log('queryInventory', queryInventory,);
+  // console.log('queryContactDetails', queryContactDetails,);
+  // return;
   const url = [ prefix, domain, ].join(joiner);
-
-  console.log('url', url,);
-  console.log('formFieldList', formFieldList,);
+  // console.log('url', url,); return;
+  // console.log('formFieldList', formFieldList,);
 
   // await page.goto( url , waitUntilLoad , );
   await page.goto( url , waiter , );
@@ -146,16 +151,20 @@ module.exports = async ({
     const selectorJoiner = ' #';
     const selector = [ selectorPrefix, id, ].join(selectorJoiner);
     const value = getValue(label, queryInventory, queryContactDetails,);
-    await page.type( selector , value , );
+    console.log('url', url,);
+    console.log('selector', selector,);
+    console.log('label', label,);
+    console.log('value', value,);
+    // await page.type( selector , value , );
   }
 
-  // await page.keyboard.press(enter);
+  // // await page.keyboard.press(enter);
   // await page.$eval('form', form => form.submit());
 
   await page.waitForNavigation();
   console.log( newPageLogHeader, page.url(), );
   await browser.close();
 
-  await write2db({ dbConfig, dbData, });
+  // await write2db({ dbConfig, dbData, });
   return;
 }

@@ -4,12 +4,12 @@
 
 // scrapes auction.com to send auction data to google sheets
 
-const getLatLong = require('../lib/latlong');
-const scrapeUrls = require('../util/scrapeUrls');
-const processResults = require('../util/processResults');
-const getLocationIndex = require('../util/locationIndex');
-const write2db = require('../lib/db/write2firestore');
-const isScheduled = require('../util/scheduler');
+const getLatLong = require('../../lib/latlong');
+const scrapeUrls = require('../../util/scrapeUrls');
+const processResults = require('../../util/processResults');
+const getLocationIndex = require('../../util/locationIndex');
+const write2db = require('../../lib/db/write2firestore');
+const isScheduled = require('../../util/scheduler');
 
 const scriptName = 'google';
 
