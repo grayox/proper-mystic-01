@@ -8,20 +8,46 @@ const options = {
 };
 
 const config = {
-  url: 'https://www.yellowpages.com/search?search_terms=Real+Estate+Agents&geo_location_terms=High+Point%2C+NC',
+  // url: 'https://www.yellowpages.com/search?search_terms=Real+Estate+Agents&geo_location_terms=High+Point%2C+NC',
+  url: 'https://www.yellowpages.com/richmond-va/real-estate-agents',
   selectors: {
     items: 'div.info',
+    // item.property.attribute: innerText, href, value, ...
     item: {
+      label: {
+        selector: 'a.business-name',
+        attribute: 'innerText',
+      },
       link: {
-        selector: 'a',
-        attribute: 'href', // value, href, innerHtml, ...
+        selector: 'a.business-name',
+        attribute: 'href',
+      },
+      address: {
+        selector: 'div.street-address',
+        attribute: 'innerText',
+      },
+      csz: {
+        selector: 'div.locality',
+        attribute: 'innerText',
+      },
+      phone: {
+        selector: 'div.phones.phone.primary',
+        attribute: 'innerText',
+      },
+      website: {
+        selector: 'div.links > a.track-visit-website',
+        attribute: 'href',
+      },
+      bbb: {
+        selector: 'bbb-rating.extra-rating.hasRating',
+        attribute: 'innerText',
       },
     },
   },
 }
 
 const run = () =>
-  new Promise(async (resolve, reject,) => {
+  new Promise(async ( resolve, reject, ) => {
     try {
       const browser = await puppeteer.launch(options);
       const page = await browser.newPage();
@@ -48,7 +74,11 @@ const run = () =>
           // const link = item.querySelector(itemSelector.link).href
           for (const property in itemConfig) {
             // console.log(`${property}: ${itemSelector[property]}`);
-            newData[property] = item.querySelector(itemConfig[property].selector)[itemConfig[property].attribute] 
+            try {
+              newData[property] = item.querySelector(itemConfig[property].selector)[itemConfig[property].attribute] 
+            } catch (e) {
+              console.log(e);
+            }
           }
 
           // results.push({ link, });
