@@ -9,7 +9,7 @@ request.get( config.yelp.businesses, {
     if (error) {
       return console.error( 'Upload failed:', error, );
     }
-    console.log( 'response', response, );
+    // console.log( 'response', response, );
     console.log( 'body', body, );
   }
 );
