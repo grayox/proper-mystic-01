@@ -7,6 +7,7 @@
     "developer_url": "https://www.yelp.com/developers/v3/manage_app?app_created=True",
     "tester_url": "https://reqbin.com/",
     "businesses": "https://api.yelp.com/v3/businesses/search?location=richmond-va&term=real-estate-agents",
+    "businesses1": "https://api.yelp.com/v3/businesses/search?location=richmond-va&term=attorney",
     "business_detail": "https://api.yelp.com/v3/businesses/X2lGbRS0Zm4nXVjWJFla-A"
   }
 }

@@ -1,0 +1,18 @@
+auction
+  read: auction.com (scrape list)
+  write: inventory
+yelpList
+  read: yelp.com (api)
+  write: agents, markets/<market>/agent/urlDetail
+realtorList
+  read: realtor.com (scrape list)
+  transform: call api for list of agent detail pages
+  write: inventory/markets/<agentsList>/urlDetail
+ypList
+  read: yellowpages.com (scrape list)
+  transform: 
+  write: inventory/markets/<agentsList>/urlDetail
+zillowList
+  read: zillow.com | https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC
+ContractReceive
+ContractAccept

@@ -1,6 +1,6 @@
 const config = {
-  // url: 'https://www.realtor.com/realestateagents/greensboro_nc',
-  url: 'https://www.realtor.com/realestateagents/greensboro_nc/sort-activelistings/pg-2',
+  // url: 'https://www.realtor.com/realestateagents/high-point_nc',
+  url: 'https://www.realtor.com/realestateagents/high-point_nc/sort-activelistings/pg-2',
   selectors: {
     cards: '.listview .agent-list-card',
     buttons: {
