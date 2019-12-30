@@ -44,15 +44,18 @@ module.exports = async ({
 
   const { source, } = dbConfig;
 
-  if( source !== 'mod' ) {
-    // 'mod' source already inititalized app to read data to be modified
-    try{
+  // if( source !== 'mod' ) {
+  //   // 'mod' source already inititalized app to read data to be modified
+  // ref: https://stackoverflow.com/a/57764002
+  if (!admin.apps.length) {
+    // try {
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(serviceAccount),
+        // databaseURL: dB_URL,
       });
-    } catch(error) {
-      console.log('error', error.message,);
-    }
+    // } catch(error) {
+    //   console.log('error', error.message,);
+    // }
   }
   
   const db = admin.firestore();
@@ -89,6 +92,10 @@ module.exports = async ({
   if(source === 'auction') {
     // for sourcing inventory
     inventoryList.forEach( item => {
+      // console.log('item', item,);
+      // skip entries that are not current; item === false per auctionList.js
+      const ready1 = !!item;
+      if(!ready1) return;
       const inventoryRef = db
         .collection(dbConfig.inventoryList.collection) // 'inventory'
         .doc(item.listDetailUrl.split(slash).slice(-1)[0]); // '255-county-club-drive-eden-nc-27288-2850751-e_13836' < 'https://www.auction.com/details/255-county-club-drive-eden-nc-27288-2850751-e_13836'

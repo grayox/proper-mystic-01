@@ -63,9 +63,17 @@ const getDbDomains = async db => {
   // fetching a list from a doc
   // // [START] fetch data
   // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // admin.initializeApp({
-  //   credential: admin.credential.cert(serviceAccount)
-  // });
+  // // ref: https://stackoverflow.com/a/57764002
+  // if (!admin.apps.length) {
+  //   // try {
+  //     admin.initializeApp({
+  //       credential: admin.credential.cert(serviceAccount),
+  //       // databaseURL: dB_URL,
+  //     });
+  //   // } catch(error) {
+  //   //   console.log('error', error.message,);
+  //   // }
+  // }
   // const db = admin.firestore();
   // const marketRef = db
   //   .collection(collection)
@@ -266,9 +274,17 @@ const getDbContactDetails = async db => {
     console.log(`Error crawling ${data}: ${err.message}`);
   });
   
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  // ref: https://stackoverflow.com/a/57764002
+  if (!admin.apps.length) {
+    // try {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        // databaseURL: dB_URL,
+      });
+    // } catch(error) {
+    //   console.log('error', error.message,);
+    // }
+  }
   const db = admin.firestore();
   const queryDomains = getDbDomains(db);
   const queryInventory = getDbInventory(db);

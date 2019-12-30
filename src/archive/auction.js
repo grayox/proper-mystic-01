@@ -6,10 +6,10 @@
 
 const puppeteer = require('puppeteer'); // npm i puppeteer -s
 const _ = require('lodash'); // npm i lodash -s
-const arrayOfObjects2csv = require('../../util/json2csv');
-const write2gas = require('../../lib/db/write2gas');
-const write2db = require('../../lib/db/write2firestore');
-const isScheduled = require('../../util/scheduler');
+const arrayOfObjects2csv = require('../util/json2csv');
+const write2gas = require('../lib/db/write2gas');
+const write2db = require('../lib/db/write2firestore');
+const isScheduled = require('../util/scheduler');
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 

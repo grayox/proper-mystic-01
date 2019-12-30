@@ -34,9 +34,17 @@ const dbConfig = {
 
   // [START] fetch data
   // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_multiple_documents_from_a_collection
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  // ref: https://stackoverflow.com/a/57764002
+  if (!admin.apps.length) {
+    // try {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        // databaseURL: dB_URL,
+      });
+    // } catch(error) {
+    //   console.log('error', error.message,);
+    // }
+  }
   const db = admin.firestore();
   const collectionRef = db.collection(collection);
   const query = await collectionRef

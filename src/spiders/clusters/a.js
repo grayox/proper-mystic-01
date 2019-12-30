@@ -18,7 +18,9 @@ const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 const states = require('../../lib/geoData/states.json');
 const isScheduled = require('../../util/scheduler');
 
+// start here
 const scriptName = 'auctionMacro';
+// calls auctionList.js
 
 const MAX_CONCURRENCY = 5;
 const slowDown = { slowMo: 500, };
@@ -61,9 +63,17 @@ const getDbInventory = db => {
   // fetching a list from a doc
   // // [START] fetch data
   // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // admin.initializeApp({
-  //   credential: admin.credential.cert(serviceAccount)
-  // });
+  // ref: https://stackoverflow.com/a/57764002
+  // if (!admin.apps.length) {
+  //   // try {
+  //     admin.initializeApp({
+  //       credential: admin.credential.cert(serviceAccount),
+  //       // databaseURL: dB_URL,
+  //     });
+  //   // } catch(error) {
+  //   //   console.log('error', error.message,);
+  //   // }
+  // }
   // const db = admin.firestore();
   // const marketRef = db
   //   .collection(collection)
@@ -153,15 +163,25 @@ const getDbInventory = db => {
     console.log(`Error crawling ${data}: ${err.message}`);
   });
   
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  const db = admin.firestore();
-  const inventory = await getDbInventory(db);
+  // // ref: https://stackoverflow.com/a/57764002
+  // if (!admin.apps.length) {
+  //   // try {
+  //     admin.initializeApp({
+  //       credential: admin.credential.cert(serviceAccount),
+  //       // databaseURL: dB_URL,
+  //     });
+  //   // } catch(error) {
+  //   //   console.log('error', error.message,);
+  //   // }
+  // }
+  // const db = admin.firestore();
+  const inventory = null; // await getDbInventory(db);
   
   const { asArray: statesArray, } = states;
   const length = statesArray.length;
-  let i = length; while(i--) {
+  // const i = 15;
+  // let i = length;
+  let i = 10; while(i--) {
     const state = statesArray[i];
     const { variant, abbreviation, } = state;
     const item = { inventory, abbreviation, };
