@@ -317,6 +317,12 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
         listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
         listAuctionDateTime = 0;
         break;
+      case 7 :
+        // s = 'Dec 31, 2019 - Jan 2, 2020'
+        // listAuctionDateDay = str2num(split[3]) || defaultResult; // end of auction
+        listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
+        listAuctionDateTime = 0;
+        break;
       default:
         // listAuctionDateDay = listAuctionDateTime = defaultResult;
     }

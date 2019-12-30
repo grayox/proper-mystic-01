@@ -181,7 +181,7 @@ const getDbInventory = db => {
   const length = statesArray.length;
   // const i = 15;
   // let i = length;
-  let i = 10; while(i--) {
+  let i = 15; while(i--) {
     const state = statesArray[i];
     const { variant, abbreviation, } = state;
     const item = { inventory, abbreviation, };
