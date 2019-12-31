@@ -1,3 +1,11 @@
+Ordered List of Scripts
+1. auctionMacro.js | Puppeteer/src/spiders/clusters/auctionMacro.js
+   calls: auctionList, write2firestore
+   writes: inventory[]
+   trigger props: isCurrent: true, hasAgent: false
+2. getAgents.js | 
+
+
 auction
   read: auction.com (scrape list)
   write: inventory
