@@ -155,7 +155,7 @@ const getDbInventory = db => {
     maxConcurrency: MAX_CONCURRENCY,
     monitor: true,
     // timeout: 30000, // 30000 default
-    puppeteerOptions: slowDown,
+    // puppeteerOptions: slowDown,
   });
 
   // In case of problems, log them
