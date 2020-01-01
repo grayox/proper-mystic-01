@@ -3,24 +3,28 @@ Ordered List of Scripts
    calls: auctionList, write2firestore
    writes: inventory[]
    trigger props: isCurrent: true, hasAgent: false
-2. getAgents.js | 
+2. getAgents.js | Puppeteer/src/util/getAgents.js
+
+// get: db/inventory {isCurrent: true, hasAgent: false}
+  // assign market: db/markets/<country-stateAbbreviation-city>
+  // loop over all agent cullers: 
+    // 1. auction
+      // read: auction.com (scrape list)
+      // write: inventory
+    // 2. yelpList
+      // read: yelp.com (api)
+      // write: agents, markets/<market>/agent/urlDetail
+    // 3. realtorList
+      // read: realtor.com (scrape list)
+      // transform: call api for list of agent detail pages
+      // write: inventory/markets/<agentsList>/urlDetail
+    // 4. ypList
+      // read: yellowpages.com (scrape list)
+      // transform: 
+      // write: inventory/markets/<agentsList>/urlDetail
+    // 5. zillowList
+      // read: zillow.com | https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC
 
 
-auction
-  read: auction.com (scrape list)
-  write: inventory
-yelpList
-  read: yelp.com (api)
-  write: agents, markets/<market>/agent/urlDetail
-realtorList
-  read: realtor.com (scrape list)
-  transform: call api for list of agent detail pages
-  write: inventory/markets/<agentsList>/urlDetail
-ypList
-  read: yellowpages.com (scrape list)
-  transform: 
-  write: inventory/markets/<agentsList>/urlDetail
-zillowList
-  read: zillow.com | https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC
 ContractReceive
 ContractAccept
