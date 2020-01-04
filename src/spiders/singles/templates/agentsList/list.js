@@ -15,17 +15,19 @@ const options = {
 module.exports = ({ source, term, city, state, zip, county, }) =>
   new Promise(async ( resolve, reject, ) => {
     try {
+
+      // destructure and assign
       configSource = config[source];
       const { getUrl, iframe, select, type, click, recaptcha, } = configSource;
       const { selector: selectSelector, value: selectValue, } = select;
       const { selector: typeSelector, text: typeText, } = type;
 
+      // startup
       const browser = await puppeteer.launch( options );
       let page = await browser.newPage();
       // const navigationPromise = page.waitForNavigation(waitUntilDocumentLoaded);
-      // await page.goto(config.url);
       const url = getUrl({ city, state, zip, county, term, });
-      await page.goto( url );
+      await page.goto( url, );
       // navigationPromise;
 
       // iframe
@@ -65,6 +67,7 @@ module.exports = ({ source, term, city, state, zip, county, }) =>
         await page.click( recaptcha, );
       }
       
+      // evaluate and resolve
       const pageData = await page.evaluate( config => {
         const { selectors, } = config;
         const { items: itemsSelector, item: itemConfig, } = selectors;
