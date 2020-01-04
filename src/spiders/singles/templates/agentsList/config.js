@@ -1,49 +1,121 @@
+// CAPTCHA
+
+// // zillow.com | CAPTCHA
+// const zillow = {
+//   selectors: {
+//     items: 'div.ldb-contact-summary',
+//     // item.property.attribute: innerText, href, value, ...
+//     item: {
+//       name: {
+//         selector: 'p.ldb-contact-name > a',
+//         attribute: 'innerText',
+//       },
+//       link: {
+//         selector: 'p.ldb-contact-name > a',
+//         attribute: 'href',
+//       },
+//       phone: {
+//         selector: 'p.ldb-phone-number',
+//         attribute: 'innerText',
+//       },
+//     },
+//   },
+//   // url: https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC
+//   // urlDetail: https://www.zillow.com/profile/CarolYoungHighPoint/
+//   // url for lenders: https://www.zillow.com/lender-directory/?sort=Relevance&location=Greensboro%2C%20NC&language=English&page=1
+//   getUrl: ({ city, state, }) =>
+//     'https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC',
+//   // {
+//   //   const stem = 'https://www.realtor.com/realestateagents';
+//   //   const tail = 'sort-activelistings/pg-1';
+//   //   const splitter = ' ';
+//   //   const joiner1 = '-';
+//   //   const joiner1a = '_';
+//   //   const joiner2 = '/';
+//   //   const formatString = s => s.split(splitter).join(joiner1)
+//   //   const formattedCity = formatString(city);
+//   //   const formattedCityState = [ formattedCity, state, ].join(joiner1a);
+//   //   const out = [ stem, formattedCityState, tail, ].join(joiner2);
+//   //   // out
+//   //   return out;
+//   // },
+// }
+// // const zillowUrl = zillow.getUrl({ city: 'high-point', state: 'nc', });
+// // zillowUrl
+
+// // reonetwork.com | CAPTCHA
+// const reo = {
+//   type: {
+//     selector: 'input#csz',
+//     text: '27214',
+//   },
+//   click: 'input#bttn-search', // selector
+//   // press: '', // selector
+//   recaptcha: 'div.recaptcha-checkbox-checkmark',
+//   selectors: {
+//     items: 'table#LeftSubTable td a',
+//     // item.property.attribute: innerText, href, value, ...
+//     item: {
+//       name: {
+//         selector: ':scope',
+//         attribute: 'innerText',
+//       },
+//       link: {
+//         selector: ':scope',
+//         attribute: 'href',
+//       },
+//     },
+//   },
+//   // url: 'https://www.reonetwork.com/search/',
+//   getUrl: () => 'https://www.reonetwork.com/search/',
+// }
+// // const reoUrl = reo.getUrl();
+// // reoUrl
+
+// API
+
+// // yelp.com | API
+// // use api instead: src/api/config.json
+// const yelp = {
+//   url: 'https://www.yelp.com/search?find_desc=Real%20Estate%20Agents&find_loc=High%20Point%2C%20NC',
+//   selectors: {
+//     items: 'body > div > div > div > div > div > div > div > div > div > ul > li',
+//     // item.property.attribute: innerText, href, name, value, ...
+//     item: {
+//       label: {
+//         selector: 'li a',
+//         attribute: 'innerText',
+//       },
+//       link: {
+//         selector: 'li a',
+//         attribute: 'href',
+//       },
+//       // address: {
+//       //   selector: 'div.street-address',
+//       //   attribute: 'innerText',
+//       // },
+//       // csz: {
+//       //   selector: 'div.locality',
+//       //   attribute: 'innerText',
+//       // },
+//       // phone: {
+//       //   selector: 'div.phones.phone.primary',
+//       //   attribute: 'innerText',
+//       // },
+//       // website: {
+//       //   selector: 'div.links > a.track-visit-website',
+//       //   attribute: 'href',
+//       // },
+//       // bbb: {
+//       //   selector: 'bbb-rating.extra-rating.hasRating',
+//       //   attribute: 'innerText',
+//       // },
+//     },
+//   },
+// };
+
 // redfin.com | post to form
 // url: https://www.redfin.com/county/2047/NC/Guilford-County/real-estate/agents
-
-// zillow.com
-const zillow = {
-  selectors: {
-    items: 'div.ldb-contact-summary',
-    // item.property.attribute: innerText, href, value, ...
-    item: {
-      name: {
-        selector: 'p.ldb-contact-name > a',
-        attribute: 'innerText',
-      },
-      link: {
-        selector: 'p.ldb-contact-name > a',
-        attribute: 'href',
-      },
-      phone: {
-        selector: 'p.ldb-phone-number',
-        attribute: 'innerText',
-      },
-    },
-  },
-  // url: https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC
-  // urlDetail: https://www.zillow.com/profile/CarolYoungHighPoint/
-  // url for lenders: https://www.zillow.com/lender-directory/?sort=Relevance&location=Greensboro%2C%20NC&language=English&page=1
-  getUrl: ({ city, state, }) =>
-    'https://www.zillow.com/high-point-nc/real-estate-agent-reviews/?sortBy=None&page=3&showAdvancedItems=True&regionID=11896&locationText=High%20Point%20NC',
-  // {
-  //   const stem = 'https://www.realtor.com/realestateagents';
-  //   const tail = 'sort-activelistings/pg-1';
-  //   const splitter = ' ';
-  //   const joiner1 = '-';
-  //   const joiner1a = '_';
-  //   const joiner2 = '/';
-  //   const formatString = s => s.split(splitter).join(joiner1)
-  //   const formattedCity = formatString(city);
-  //   const formattedCityState = [ formattedCity, state, ].join(joiner1a);
-  //   const out = [ stem, formattedCityState, tail, ].join(joiner2);
-  //   // out
-  //   return out;
-  // },
-}
-
-// const zillowUrl = zillow.getUrl({ city: 'high-point', state: 'nc', });
-// zillowUrl
 
 // realtor.com
 const realtor = {
@@ -203,6 +275,7 @@ const bpo = {
 // const bpoUrl = bpo.getUrl({zip: '02139'});
 // bpoUrl
 
+
 // https://www.homepath.com/
 const homePath = {
   selectors: {
@@ -265,50 +338,54 @@ const homePath = {
 // const homePathUrl = homePath.getUrl({city: 'mobile', state: 'al',});
 // homePathUrl
 
-// // use api instead: src/api/config.json
-// // yelp.com
-// const yelp = {
-//   url: 'https://www.yelp.com/search?find_desc=Real%20Estate%20Agents&find_loc=High%20Point%2C%20NC',
-//   selectors: {
-//     items: 'body > div > div > div > div > div > div > div > div > div > ul > li',
-//     // item.property.attribute: innerText, href, name, value, ...
-//     item: {
-//       label: {
-//         selector: 'li a',
-//         attribute: 'innerText',
-//       },
-//       link: {
-//         selector: 'li a',
-//         attribute: 'href',
-//       },
-//       // address: {
-//       //   selector: 'div.street-address',
-//       //   attribute: 'innerText',
-//       // },
-//       // csz: {
-//       //   selector: 'div.locality',
-//       //   attribute: 'innerText',
-//       // },
-//       // phone: {
-//       //   selector: 'div.phones.phone.primary',
-//       //   attribute: 'innerText',
-//       // },
-//       // website: {
-//       //   selector: 'div.links > a.track-visit-website',
-//       //   attribute: 'href',
-//       // },
-//       // bbb: {
-//       //   selector: 'bbb-rating.extra-rating.hasRating',
-//       //   attribute: 'innerText',
-//       // },
-//     },
-//   },
-// };
+// hudhomestore.com
+const hud = {
+  iframe: 'iframe#inWin107',
+  select: {
+    selector: 'td select#ddState',
+    value: 'NC',
+  },
+  type: {
+    selector: 'td > input#txtZipCode',
+    text: '27214',
+  },
+  click: 'td span#btnSearch', // selector
+  // press: '', // selector
+  // recaptcha: 'div.recaptcha-checkbox-checkmark',
+  selectors: {
+    items: '#dgBrokerList > tbody > tr.bsresultrow',
+    // item.property.attribute: innerText, href, value, ...
+    item: {
+      company: {
+        selector: 'td:nth-of-type(1)',
+        attribute: 'innerText',
+      },
+      name: {
+        selector: 'td:nth-of-type(2)',
+        attribute: 'innerText',
+      },
+      location: {
+        selector: 'td:nth-of-type(3)',
+        attribute: 'innerText',
+      },
+      phone: {
+        selector: 'td:nth-of-type(4)',
+        attribute: 'innerText',
+      },
+    },
+  },
+  // url: 'https://www.hudhomestore.com/Listing/BrokerSearch.aspx?sLanguage=ENGLISH',
+  getUrl: () => 'https://www.hudhomestore.com/Listing/BrokerSearch.aspx?sLanguage=ENGLISH',
+}
+// const hudUrl = hud.getUrl();
+// hudUrl
 
 module.exports = {
   // custom
-  bpo, homePath, realtor, zillow, // reo, redfin,
+  bpo, hud, homePath, realtor, // redfin,
   // salesbot
   yellow,
-  // yelp | use api at src/api/config.json
+  // API:
+    // yelp | use api at src/api/config.json
+  // CAPTCHA: // zillow, reo,
 };

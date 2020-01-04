@@ -4,8 +4,9 @@ const puppeteer = require('puppeteer');
 const config = require('./config');
 
 const options = {
-  headless: true,
   // slowMo: 500,
+  // headless: false,
+  // waitUntil: 'load',
 };
 
 // const run = () =>

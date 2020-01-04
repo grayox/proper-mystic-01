@@ -3,7 +3,7 @@ Ordered List of Scripts
    calls: auctionList, write2firestore
    writes: inventory[]
    trigger props: isCurrent: true, hasAgent: false
-2. getAgents.js | Puppeteer/src/util/getAgents.js
+2. getAgents.js | Puppeteer/src/spiders/singles/templates/agentsList/getAgents.js
 
 // get: db/inventory {isCurrent: true, hasAgent: false}
   // assign market: db/markets/<country-stateAbbreviation-city>
