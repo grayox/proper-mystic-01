@@ -3,6 +3,7 @@
 // // zillow.com | CAPTCHA
 // const zillow = {
 //   selectors: {
+//     // a selector all list items share in common ... $$() ... document.querySelectorAll()
 //     items: 'div.ldb-contact-summary',
 //     // item.property.attribute: innerText, href, value, ...
 //     item: {
@@ -53,6 +54,7 @@
 //   // press: '', // selector
 //   recaptcha: 'div.recaptcha-checkbox-checkmark',
 //   selectors: {
+//     // a selector all list items share in common ... $$() ... document.querySelectorAll()
 //     items: 'table#LeftSubTable td a',
 //     // item.property.attribute: innerText, href, value, ...
 //     item: {
@@ -79,6 +81,7 @@
 // const yelp = {
 //   url: 'https://www.yelp.com/search?find_desc=Real%20Estate%20Agents&find_loc=High%20Point%2C%20NC',
 //   selectors: {
+//     // a selector all list items share in common ... $$() ... document.querySelectorAll()
 //     items: 'body > div > div > div > div > div > div > div > div > div > ul > li',
 //     // item.property.attribute: innerText, href, name, value, ...
 //     item: {
@@ -120,6 +123,7 @@
 // realtor.com
 const realtor = {
   selectors: {
+    // a selector all list items share in common ... $$() ... document.querySelectorAll()
     items: 'div.agent-list-card',
     // item.property.attribute: innerText, href, value, ...
     item: {
@@ -184,6 +188,7 @@ const realtor = {
 // yellowpages.com
 const yellow = {
   selectors: {
+    // a selector all list items share in common ... $$() ... document.querySelectorAll()
     items: 'div.info',
     // item.property.attribute: innerText, href, value, ...
     item: {
@@ -239,6 +244,7 @@ const yellow = {
 // https://nabpop.org/
 const bpo = {
   selectors: {
+    // a selector all list items share in common ... $$() ... document.querySelectorAll()
     items: 'table#directoryResultsTable > tbody > tr',
     // item.property.attribute: innerText, href, value, ...
     item: {
@@ -279,6 +285,7 @@ const bpo = {
 // https://www.homepath.com/
 const homePath = {
   selectors: {
+    // a selector all list items share in common ... $$() ... document.querySelectorAll()
     items: 'div#fragmentsSearchResultsList > table.table.table-results > tbody > tr',
     // item.property.attribute: innerText, href, value, ...
     item: {
@@ -353,6 +360,7 @@ const hud = {
   // press: '', // selector
   // recaptcha: 'div.recaptcha-checkbox-checkmark',
   selectors: {
+    // a selector all list items share in common ... $$() ... document.querySelectorAll()
     items: '#dgBrokerList > tbody > tr.bsresultrow',
     // item.property.attribute: innerText, href, value, ...
     item: {

@@ -5,7 +5,7 @@ const config = require('./config');
 
 const options = {
   slowMo: 500,
-  headless: false,
+  // headless: false,
   waitUntil: 'load',
 };
 // ref: https://stackoverflow.com/a/58298172/1640892
@@ -23,7 +23,7 @@ module.exports = ({ source, term, city, state, zip, county, }) =>
       const { selector: typeSelector, text: typeText, } = type;
 
       // startup
-      const browser = await puppeteer.launch( options );
+      const browser = await puppeteer.launch( options, );
       let page = await browser.newPage();
       // const navigationPromise = page.waitForNavigation(waitUntilDocumentLoaded);
       const url = getUrl({ city, state, zip, county, term, });
@@ -36,7 +36,7 @@ module.exports = ({ source, term, city, state, zip, county, }) =>
         const iframeElement = await page.$( iframe, );
         page = await iframeElement.contentFrame();
       }
- 
+
       // select
       // await page.select('#telCountryInput', 'my-value')
       if( select ){
@@ -75,7 +75,7 @@ module.exports = ({ source, term, city, state, zip, county, }) =>
         const items = document.querySelectorAll( itemsSelector, );
         items.forEach( item => {
           const newData = {};
-          for (const property in itemConfig) {
+          for( const property in itemConfig ) {
             try {
               const { selector, attribute, } = itemConfig[ property ];
               newData[ property ] = item.querySelector( selector, )[ attribute ];
@@ -89,7 +89,7 @@ module.exports = ({ source, term, city, state, zip, county, }) =>
       }, configSource, );
       browser.close();
       return resolve( pageData, );
-    } catch ( error ) {
+    } catch( error ) {
       return reject( error, );
     }
   })
