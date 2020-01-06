@@ -1,3 +1,4 @@
+const config = //require('./sms.json');
 {
   "source": "https://20somethingfinance.com/how-to-send-text-messages-sms-via-email-for-free/",
   "comment1": "txt.att.net means actual number is number@txt.att.net",
@@ -71,4 +72,22 @@
       "mms": "mypixmessages.com"
     }
   }
+};
+
+function getEmailList( textNumber ) {
+  var empty = '';
+  var joiner = '@';
+  var re = /\d/g;
+  var num = textNumber.match(re).join(empty); // num
+  var out = [];
+  var carriers = config.carriers;
+  var keys = Object.keys( carriers ).reverse(); // keys
+  var length = keys.length;
+  var i = length; while(i--) {
+    var key = keys[i];
+    var email = [ num, carriers[ key ].sms ].join(joiner);
+    out.push( email );
+  }
+  return out;
 }
+// const emails = getEmailList('555-555-9999'); // emails
