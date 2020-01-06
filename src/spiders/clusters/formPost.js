@@ -15,7 +15,7 @@ const postDetail = require('./postDetail'); // posts to form
 // const write2db = require('../../lib/db/write2firestore');
 const isScheduled = require('../../util/scheduler');
 
-const getDb = require('./getDb');
+const getDb = require('../../lib/db/getDb');
 const db = getDb();
 
 const scriptName = 'formPost';

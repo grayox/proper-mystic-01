@@ -15,7 +15,7 @@ const auctionList = require('./auctionList');
 const states = require('../../lib/geoData/states.json');
 // const isScheduled = require('../../util/scheduler');
 
-const getDb = require('./getDb');
+const getDb = require('../../lib/db/getDb');
 const todayDate = require('../../util/todayDate');
 const db = getDb();
 const {
@@ -36,8 +36,8 @@ const options = {
 const runTransaction = () => {
 
   // Initialize document
-  const statRef = db.collection('stats').doc(formattedDate);
-  const setStat = statRef.set({
+  const statsRef = db.collection('stats').doc(formattedDate);
+  const setStats = statsRef.set({
     name: 'San Francisco',
     state: 'CA',
     country: 'USA',
@@ -46,13 +46,13 @@ const runTransaction = () => {
   });
   
   const transaction = db.runTransaction(t => {
-    return t.get(statRef)
+    return t.get(statsRef)
       .then(doc => {
         // Add one person to the city population.
         // Note: this could be done without a transaction
         //       by updating the population using FieldValue.increment()
         let newPopulation = doc.data().population + 1;
-        t.update(statRef, {population: newPopulation});
+        t.update(statsRef, {population: newPopulation});
       });
   }).then(result => {
     console.log('Transaction success!');

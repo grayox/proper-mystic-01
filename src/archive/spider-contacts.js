@@ -3,7 +3,7 @@
 
 const puppeteer = require('puppeteer');
 const forms = require('../../lib/forms.json');
-const getDb = require('./getDb');
+const getDb = require('../../lib/db/getDb');
 const db = getDb();
 
 const collection = 'markets';

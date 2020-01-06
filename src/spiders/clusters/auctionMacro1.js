@@ -15,7 +15,7 @@ const auctionList = require('./auctionList');
 const states = require('../../lib/geoData/states.json');
 const isScheduled = require('../../util/scheduler');
 
-// const getDb = require('./getDb');
+// const getDb = require('../../lib/db/getDb');
 // const db = getDb();
 
 // start here

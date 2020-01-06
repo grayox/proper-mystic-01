@@ -16,8 +16,8 @@ const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 const write2db = require('../../lib/db/write2firestore');
 const isScheduled = require('../../util/scheduler');
 
-// const getDb = require('./getDb');
-// const db = getDb();
+const getDb = require('../../lib/db/getDb');
+const db = getDb();
 
 const scriptName = 'contact';
 
@@ -102,10 +102,6 @@ const pageFunction = items => { // items.length;
   // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_multiple_documents_from_a_collection
   const { collection, field, operator, value, limit, } = queryFilter;
   
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  const db = admin.firestore();
   const collectionRef = db.collection(collection);
   const query = await collectionRef
     // .where('capital', '==', true)
