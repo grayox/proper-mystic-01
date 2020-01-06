@@ -8,13 +8,14 @@
 // You need to download the Alexa 1M from http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
 // and unzip it into this directory
 
-const { Cluster } = require('puppeteer-cluster');
 // const puppeteer = require('puppeteer');
+const { Cluster } = require('puppeteer-cluster');
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../../lib/db/serviceAcctKey.json');
-const write2db = require('../../lib/db/write2firestore');
+// const write2db = require('../../lib/db/write2firestore');
 const isScheduled = require('../../util/scheduler');
+
+const getDb = require('./getDb');
+const db = getDb();
 
 const scriptName = 'formGet';
 
@@ -115,18 +116,6 @@ const pageFunction = items => { // items.length;
   // fetching a list from a doc
   // // [START] fetch data
   // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // // ref: https://stackoverflow.com/a/57764002
-  // if (!admin.apps.length) {
-  //   // try {
-  //     admin.initializeApp({
-  //       credential: admin.credential.cert(serviceAccount),
-  //       // databaseURL: dB_URL,
-  //     });
-  //   // } catch(error) {
-  //   //   console.log('error', error.message,);
-  //   // }
-  // }
-  // const db = admin.firestore();
   // const marketRef = db
   //   .collection(collection)
   //   .doc(doc);
@@ -154,18 +143,6 @@ const pageFunction = items => { // items.length;
   // const { collection, field, operator, value, limit, } = queryFilter;
   const { collection, filters, limit, } = queryFilter;
   
-  // ref: https://stackoverflow.com/a/57764002
-  if (!admin.apps.length) {
-    // try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        // databaseURL: dB_URL,
-      });
-    // } catch(error) {
-    //   console.log('error', error.message,);
-    // }
-  }
-  const db = admin.firestore();
   const collectionRef = db.collection(collection);
   const query = await collectionRef
     // .where('capital', '==', true)

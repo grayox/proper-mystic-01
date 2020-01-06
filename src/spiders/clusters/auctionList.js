@@ -9,12 +9,18 @@ const _ = require('lodash'); // npm i lodash -s
 const arrayOfObjects2csv = require('../../util/json2csv');
 const write2gas = require('../../lib/db/write2gas');
 const write2db = require('../../lib/db/write2firestore');
+const todayDate = require('../../util/todayDate');
 const isScheduled = require('../../util/scheduler');
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 
 // called by auctionMacro.js
 const scriptName = 'auctionList';
+
+const {
+  // todaysDate, todaysMonth,
+  monthsArray, timestamp, todaysDayOfTheMonth, todaysMonthOneIndex, todaysYear,
+} = todayDate;
 
 const dbConfig = {
   source: 'auction',
@@ -53,13 +59,6 @@ const dbConfig = {
 //   // page 3   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/3_cp/y_nbs/'
 // }
 
-const timestamp = Date.now();
-const todaysDate = new Date(timestamp);
-const todaysDayOfTheMonth = todaysDate.getDate(); // index: 1
-const todaysMonth = todaysDate.getMonth();        // index: 0
-const todaysMonthOneIndex = todaysMonth + 1;      // index: 1
-const todaysYear = todaysDate.getFullYear();
-
 const getIsCurrent = (listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,) => {
   console.log('todaysDate', todaysDayOfTheMonth,);
   console.log('todaysMonth', todaysMonthOneIndex,);
@@ -67,14 +66,13 @@ const getIsCurrent = (listAuctionDateDay, listAuctionDateMonthNumber, listAuctio
   console.log('listAuctionDateDay', listAuctionDateDay,);
   console.log('listAuctionDateMonthNumber', listAuctionDateMonthNumber,);
   console.log('listAuctionDateYear', listAuctionDateYear,);
-  const sameDay   = ( listAuctionDateDay         === todaysDayOfTheMonth  );
-  const sameMonth = ( listAuctionDateMonthNumber === todaysMonthOneIndex  );
-  const sameYear  = ( listAuctionDateYear        === todaysYear           );
+  const sameDay   = ( listAuctionDateDay         === todaysDayOfTheMonth );
+  const sameMonth = ( listAuctionDateMonthNumber === todaysMonthOneIndex );
+  const sameYear  = ( listAuctionDateYear        === todaysYear          );
   const out = ( sameDay && sameMonth && sameYear );
   console.log('isCurrent', out,);
   return out;
 }
-
 
 const getUrl = ( abbreviation, pageNumber = 1, ) =>
   `https://www.auction.com/residential/${abbreviation}/active_lt/resi_sort_v2_st/y_sr/${pageNumber}_cp/y_nbs/`;
@@ -93,19 +91,18 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
 
   const isWrite2db = true;
   const isWrite2gas = false;
-  const url = getUrl( abbreviation, );
+  const url = getUrl( abbreviation, page, );
   // console.log('url', url,); return;
   // const market = [ 'us', abbreviation, ].join(joiner).toLowerCase();
   const source = 'auction.com';
-  const splitDelimeter1 = ' ';
-  const splitDelimeter2 = ', ';
+  const splitter1 = ' ';
+  const splitter2 = ', ';
   // const allCommas = /,*/g;
   const nonDigits = /\D*/g;
   const currencyChars = /(\$*,*)/g;
   // const joiner = '-';
   const emptyString = '';
   const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
-  const monthsArray = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', ];
   
   // const arrayOfObjects2csv = items => {
   //   // ref: https://stackoverflow.com/a/31536517
@@ -286,7 +283,6 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
   }
 
   const processDate = s => {
-    const delimeter1 = ' ';
     let listAuctionDateMonthText = listAuctionDateTimestamp = listAuctionDateMonthNumber =
       listAuctionDateYear = listAuctionDateDay = listAuctionDateTime = defaultResult;
     listAuctionDateYear = todaysYear;
@@ -295,7 +291,7 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
       listAuctionDateDay, listAuctionDateTime,
       listAuctionDateYear, listAuctionDateTimestamp,
     }
-    const split = s.split(delimeter1);
+    const split = s.split(splitter1);
     
     const ready1 = split;
     if(!ready1) return defaultDate;
@@ -368,15 +364,15 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
     // const listCsz = titleCase(item.listCsz); // reformats state undesirably
     const listAddress = (titleCase(item.listAddress)) || defaultResult;
     console.log('listAddress', listAddress,);
-    const listCszSplit = (item.listCsz && item.listCsz.split(splitDelimeter2)) || defaultResult;
+    const listCszSplit = (item.listCsz && item.listCsz.split(splitter2)) || defaultResult;
     const listCity = (listCszSplit && titleCase(listCszSplit[0])) || defaultResult;
     const listCounty = (listCszSplit && titleCase(listCszSplit[2])) || defaultResult;
     const listStateZip = (listCszSplit && listCszSplit[1]) || defaultResult;
-    const listStateZipSplit = (listStateZip && listStateZip.split(splitDelimeter1)) || defaultResult;
+    const listStateZipSplit = (listStateZip && listStateZip.split(splitter1)) || defaultResult;
     const listState = (listStateZipSplit && listStateZipSplit[0]) || defaultResult;
     console.log('listState', listState,);
     const listZip = (listStateZipSplit && listStateZipSplit[1]) || defaultResult;
-    // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(splitDelimeter1)) || defaultResult;
+    // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(splitter1)) || defaultResult;
     // const listAuctionDateMonthText = (listAuctionDateSplit && listAuctionDateSplit[0] && listAuctionDateSplit[0].replace(allCommas, emptyString,)) || defaultResult;
     // const listAuctionDateMonthNumber = (monthsArray.indexOf(listAuctionDateMonthText) + 1) || defaultResult;
     // const listAuctionDateDay = (listAuctionDateSplit && str2num(listAuctionDateSplit[1])) || defaultResult;
@@ -388,7 +384,7 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
       listAuctionDateDate, listAuctionDateTimestamp,
     } = processedDate;
     // const listAuctionDateTimestamp = new Date(2018, 11, 24, 10, 33, 30, 0);
-    const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(splitDelimeter2)) || defaultResult;
+    const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(splitter2)) || defaultResult;
     const listForeclosureOrBankOwned = (listAuctionTypeSplit && listAuctionTypeSplit[0]) || defaultResult;
     const listInPersonOrOnline = (listAuctionTypeSplit && listAuctionTypeSplit[1]) || defaultResult;
     const listArv = (item.listArv && str2num(item.listArv)) || defaultResult;
@@ -397,7 +393,7 @@ module.exports = async ({ page, data: { inventory, abbreviation, }, }) => {
     const listBeds  = (item.listBeds  && Number(item.listBeds))  || defaultResult;
     const listBaths = (item.listBaths && Number(item.listBaths)) || defaultResult;
     const listSqft  = (item.listSqft  && str2num(item.listSqft)) || defaultResult;
-    const isCurrent = getIsCurrent(listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,)
+    const isCurrent = getIsCurrent(listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,);
     const out = {
       // meta data
       timestamp, source, isCurrent, listUrl: url, hasAgent: false, // market,

@@ -13,6 +13,12 @@ const isScheduled = require('../../util/scheduler');
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 
+const todayDate = require('../../util/todayDate');
+const {
+  monthsArray, timestamp, todaysDate, todaysYear,
+  todaysDayOfTheMonth,  todaysMonth, todaysMonthOneIndex,
+} = todayDate;
+
 const scriptName = 'auction';
 
 const dbConfig = {
@@ -90,7 +96,6 @@ const getUrl = ( city, state, ) => {
   const currencyChars = /(\$*,*)/g;
   const emptyString = '';
   const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
-  const monthsArray = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', ];
 
   // const arrayOfObjects2csv = items => {
   //   // ref: https://stackoverflow.com/a/31536517
@@ -271,9 +276,7 @@ const getUrl = ( city, state, ) => {
     const delimeter1 = ' ';
     let listAuctionDateMonthText = listAuctionDateTimestamp = listAuctionDateMonthNumber =
       listAuctionDateYear = listAuctionDateDay = listAuctionDateTime = defaultResult;
-    const todaysDate = new Date(timestamp);
-    const todaysMonth = todaysDate.getMonth();
-    listAuctionDateYear = todaysDate.getFullYear();
+    listAuctionDateYear = todaysYear;
     const defaultDate = {
       listAuctionDateMonthText, listAuctionDateMonthNumber,
       listAuctionDateDay, listAuctionDateTime,

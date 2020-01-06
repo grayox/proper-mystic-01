@@ -16,6 +16,9 @@ const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 const write2db = require('../../lib/db/write2firestore');
 const isScheduled = require('../../util/scheduler');
 
+// const getDb = require('./getDb');
+// const db = getDb();
+
 const scriptName = 'contact';
 
 // const collection = 'markets';
@@ -73,18 +76,6 @@ const pageFunction = items => { // items.length;
   // fetching a list from a doc
   // // [START] fetch data
   // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // // ref: https://stackoverflow.com/a/57764002
-  // if (!admin.apps.length) {
-  //   // try {
-  //     admin.initializeApp({
-  //       credential: admin.credential.cert(serviceAccount),
-  //       // databaseURL: dB_URL,
-  //     });
-  //   // } catch(error) {
-  //   //   console.log('error', error.message,);
-  //   // }
-  // }
-  // const db = admin.firestore();
   // const marketRef = db
   //   .collection(collection)
   //   .doc(doc);

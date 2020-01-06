@@ -11,17 +11,18 @@
 const { Cluster } = require('puppeteer-cluster');
 // const puppeteer = require('puppeteer');
 
-const admin = require('firebase-admin');
 const postDetail = require('./postDetail'); // posts to form
-const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 // const write2db = require('../../lib/db/write2firestore');
 const isScheduled = require('../../util/scheduler');
+
+const getDb = require('./getDb');
+const db = getDb();
 
 const scriptName = 'formPost';
 
 const MAX_CONCURRENCY = 5;
 
-const getDbDomains = async db => {
+const getDomains = async () => {
 
   // date calculations
   const daysToGoBack = 5;
@@ -63,18 +64,6 @@ const getDbDomains = async db => {
   // fetching a list from a doc
   // // [START] fetch data
   // // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // // ref: https://stackoverflow.com/a/57764002
-  // if (!admin.apps.length) {
-  //   // try {
-  //     admin.initializeApp({
-  //       credential: admin.credential.cert(serviceAccount),
-  //       // databaseURL: dB_URL,
-  //     });
-  //   // } catch(error) {
-  //   //   console.log('error', error.message,);
-  //   // }
-  // }
-  // const db = admin.firestore();
   // const marketRef = db
   //   .collection(collection)
   //   .doc(doc);
@@ -138,7 +127,7 @@ const getDbDomains = async db => {
   return query;
 }
 
-const getDbInventory = async db => {
+const getInventory = async () => {
   const queryFilter = {
     collection: 'inventory',
     limit: 1,
@@ -198,7 +187,7 @@ const getDbInventory = async db => {
     return query;
 }
 
-const getDbContactDetails = async db => {
+const getContactDetails = async () => {
   const queryFilter = {
     collection: 'contacts',
     limit: 1,
@@ -274,21 +263,9 @@ const getDbContactDetails = async db => {
     console.log(`Error crawling ${data}: ${err.message}`);
   });
   
-  // ref: https://stackoverflow.com/a/57764002
-  if (!admin.apps.length) {
-    // try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        // databaseURL: dB_URL,
-      });
-    // } catch(error) {
-    //   console.log('error', error.message,);
-    // }
-  }
-  const db = admin.firestore();
-  const queryDomains = getDbDomains(db);
-  const queryInventory = getDbInventory(db);
-  const queryContactDetails = getDbContactDetails(db);
+  const queryDomains = getDomains();
+  const queryInventory = getInventory();
+  const queryContactDetails = getContactDetails();
   const queryData = await Promise.all([ queryDomains, queryInventory, queryContactDetails, ])
     .then( values => values );
 

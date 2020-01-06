@@ -2,10 +2,8 @@
 // https://firebase.google.com/docs/firestore/quickstart
 
 const _ = require('lodash'); // npm i lodash -s
-
-// Initialize on your own server
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAcctKey.json');
+const getDb = require('./getDb');
+const db = getDb();
 
 // const timestamp = Date.now();
 const merge = { merge: true, };
@@ -43,22 +41,6 @@ module.exports = async ({
 }) => {
 
   const { source, } = dbConfig;
-
-  // if( source !== 'mod' ) {
-  //   // 'mod' source already inititalized app to read data to be modified
-  // ref: https://stackoverflow.com/a/57764002
-  if (!admin.apps.length) {
-    // try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        // databaseURL: dB_URL,
-      });
-    // } catch(error) {
-    //   console.log('error', error.message,);
-    // }
-  }
-  
-  const db = admin.firestore();
   
   // const docRef = db.collection(collection).doc(doc);
   // // const setData = 

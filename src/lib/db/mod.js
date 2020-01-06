@@ -1,8 +1,8 @@
 // modifies existing records in the database
 
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAcctKey.json');
 const write2db = require('./write2firestore');
+const getDb = require('./getDb');
+const db = getDb();
 
 const collection = 'domains';
 
@@ -34,18 +34,6 @@ const dbConfig = {
 
   // [START] fetch data
   // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_multiple_documents_from_a_collection
-  // ref: https://stackoverflow.com/a/57764002
-  if (!admin.apps.length) {
-    // try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        // databaseURL: dB_URL,
-      });
-    // } catch(error) {
-    //   console.log('error', error.message,);
-    // }
-  }
-  const db = admin.firestore();
   const collectionRef = db.collection(collection);
   const query = await collectionRef
     // .where('capital', '==', true)

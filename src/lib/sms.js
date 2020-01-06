@@ -77,15 +77,15 @@ const config = //require('./sms.json');
 function getEmailList( textNumber ) {
   var empty = '';
   var joiner = '@';
-  var re = /\d/g;
-  var num = textNumber.match(re).join(empty); // num
+  var digits = /\d/g;
+  var num = textNumber.match(digits).join(empty); // num
   var out = [];
   var carriers = config.carriers;
-  var keys = Object.keys( carriers ).reverse(); // keys
+  var keys = Object.keys(carriers).reverse(); // keys
   var length = keys.length;
   var i = length; while(i--) {
     var key = keys[i];
-    var email = [ num, carriers[ key ].sms ].join(joiner);
+    var email = [ num, carriers[key].sms ].join(joiner);
     out.push( email );
   }
   return out;

@@ -2,16 +2,16 @@
 // try all contact pages: example.com/contact-us and similar domain children
 
 const puppeteer = require('puppeteer');
-const admin = require('firebase-admin');
-const serviceAccount = require('../../lib/db/serviceAcctKey.json');
 const forms = require('../../lib/forms.json');
+const getDb = require('./getDb');
+const db = getDb();
 
 const collection = 'markets';
 const doc = 'us-va-richmond';
 
-const joiner1 = '/';
+// const joiner1 = '/';
 const joiner2 = '://';
-const contactExtensions = forms.contact;
+// const contactExtensions = forms.contact;
 
 const waitUntilLoad = {
   waitUntil: 'load',
@@ -43,18 +43,6 @@ const pageFunction = $posts => { // $posts.map( $post => $post.href )
 
   // [START] fetch data
   // ref: https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
-  // ref: https://stackoverflow.com/a/57764002
-  if (!admin.apps.length) {
-    // try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        // databaseURL: dB_URL,
-      });
-    // } catch(error) {
-    //   console.log('error', error.message,);
-    // }
-  }
-  const db = admin.firestore();
   const marketRef = db.collection(collection).doc(doc);
   const domains = await marketRef.get()
     .then( doc => {
