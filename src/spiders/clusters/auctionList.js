@@ -60,12 +60,12 @@ const dbConfig = {
 // }
 
 const getIsCurrent = (listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,) => {
-  console.log('todaysDate', todaysDayOfTheMonth,);
-  console.log('todaysMonth', todaysMonthOneIndex,);
-  console.log('todaysYear', todaysYear,);
-  console.log('listAuctionDateDay', listAuctionDateDay,);
-  console.log('listAuctionDateMonthNumber', listAuctionDateMonthNumber,);
-  console.log('listAuctionDateYear', listAuctionDateYear,);
+  // console.log('todaysDate', todaysDayOfTheMonth,);
+  // console.log('todaysMonth', todaysMonthOneIndex,);
+  // console.log('todaysYear', todaysYear,);
+  // console.log('listAuctionDateDay', listAuctionDateDay,);
+  // console.log('listAuctionDateMonthNumber', listAuctionDateMonthNumber,);
+  // console.log('listAuctionDateYear', listAuctionDateYear,);
   const sameDay   = ( listAuctionDateDay         === todaysDayOfTheMonth );
   const sameMonth = ( listAuctionDateMonthNumber === todaysMonthOneIndex );
   const sameYear  = ( listAuctionDateYear        === todaysYear          );
@@ -242,46 +242,55 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
     Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] a' ))
       .map( item => {
         const na = 'N/A';
-        const parentSelector = 'div[class^="styles__asset-container"]';
-        const config = {
-          // listDetailUrlSelector       : , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
-          listAddressSelector         : `${parentSelector} h4[data-elm-id$="_address_content_1"]`            , // 170 GROVE PARK CIRCLE
-          listCszSelector             : `${parentSelector} label[data-elm-id$="_address_content_2"]`         , // DANVILLE, VA 24541, Danville city County
-          listAuctionDateRawSelector  : `${parentSelector} h4[data-elm-id$="_auction_date"]`                 , // Nov 22, 3:00pm
-          listAuctionTypeSelector     : `${parentSelector} label[data-elm-id$="_auction_type"]`              , // Foreclosure Sale, In Person | Bank Owned, Online
-          listBedsSelector            : `${parentSelector} h4[data-elm-id$="_beds"]`                         , // 3
-          listBathsSelector           : `${parentSelector} h4[data-elm-id$="_baths"]`                        , // 2
-          listSqftSelector            : `${parentSelector} h4[data-elm-id$="_sqft"]`                         , // 1,410
-          listArvSelector             : `${parentSelector} h4[data-elm-id="label_after_repair_value_value"]` , // $149,000
-          listReserveSelector         : `${parentSelector} h4[data-elm-id="label_reserve_value"]`            , // $25,000
-          listOpeningBidSelector      : `${parentSelector} h4[data-elm-id="label_starting_bid_value"]`       , // $25,000
-          listNoBuyersPremiumSelector : `${parentSelector} label[data-elm-id$="_No Buyer\'s Premium_label"]` , // No Buyer's Premium
-          listVacantSelector          : `${parentSelector} label[data-elm-id$="_Vacant_label"]`              , // Vacant
+        const container = 'div[class^="styles__asset-container"]';
+        const configSelectors = {
+          // listDetailUrlSelector: , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
+          listAddress         : `${container} h4[data-elm-id$="_address_content_1"]`            , // 170 GROVE PARK CIRCLE
+          listCsz             : `${container} label[data-elm-id$="_address_content_2"]`         , // DANVILLE, VA 24541, Danville city County
+          listAuctionDateRaw  : `${container} h4[data-elm-id$="_auction_date"]`                 , // Nov 22, 3:00pm
+          listAuctionType     : `${container} label[data-elm-id$="_auction_type"]`              , // Foreclosure Sale, In Person | Bank Owned, Online
+          listBeds            : `${container} h4[data-elm-id$="_beds"]`                         , // 3
+          listBaths           : `${container} h4[data-elm-id$="_baths"]`                        , // 2
+          listSqft            : `${container} h4[data-elm-id$="_sqft"]`                         , // 1,410
+          listArv             : `${container} h4[data-elm-id="label_after_repair_value_value"]` , // $149,000
+          listReserve         : `${container} h4[data-elm-id="label_reserve_value"]`            , // $25,000
+          listOpeningBid      : `${container} h4[data-elm-id="label_starting_bid_value"]`       , // $25,000
+          listNoBuyersPremium : `${container} label[data-elm-id$="_No Buyer\'s Premium_label"]` , // No Buyer's Premium
+          listVacant          : `${container} label[data-elm-id$="_Vacant_label"]`              , // Vacant
         };
-        const {
-          listAddressSelector, listCszSelector, listAuctionDateRawSelector, listAuctionTypeSelector,
-          listBedsSelector, listBathsSelector, listSqftSelector, listArvSelector, listReserveSelector,
-          listOpeningBidSelector, listNoBuyersPremiumSelector, listVacantSelector,
-        } = config;
-        return {
-          // address: document.querySelector( listAddress ).innerText.trim(),
-          // address: $( listAddress ).innerText.trim(),
-          // listDetailUrl    : ( item.querySelector( 'div > a' ) && item.querySelector( 'div > a' ).href.trim() ) || 'N/A' , 
-          listDetailUrl       : ( item.href || na ) ,
-          listAddress         : ( item.querySelector( listAddressSelector         ) && item.querySelector( listAddressSelector         ).innerText.trim() ) || na ,
-          listCsz             : ( item.querySelector( listCszSelector             ) && item.querySelector( listCszSelector             ).innerText.trim() ) || na ,
-          listAuctionDateRaw  : ( item.querySelector( listAuctionDateRawSelector  ) && item.querySelector( listAuctionDateRawSelector  ).innerText.trim() ) || na ,
-          listAuctionType     : ( item.querySelector( listAuctionTypeSelector     ) && item.querySelector( listAuctionTypeSelector     ).innerText.trim() ) || na ,
-          listBeds            : ( item.querySelector( listBedsSelector            ) && item.querySelector( listBedsSelector            ).innerText.trim() ) || na ,
-          listBaths           : ( item.querySelector( listBathsSelector           ) && item.querySelector( listBathsSelector           ).innerText.trim() ) || na ,
-          listSqft            : ( item.querySelector( listSqftSelector            ) && item.querySelector( listSqftSelector            ).innerText.trim() ) || na ,
-          listArv             : ( item.querySelector( listArvSelector             ) && item.querySelector( listArvSelector             ).innerText.trim() ) || na ,
-          listReserve         : ( item.querySelector( listReserveSelector         ) && item.querySelector( listReserveSelector         ).innerText.trim() ) || na ,
-          listOpeningBid      : ( item.querySelector( listOpeningBidSelector      ) && item.querySelector( listOpeningBidSelector      ).innerText.trim() ) || na ,
-          listNoBuyersPremium : ( item.querySelector( listNoBuyersPremiumSelector ) && item.querySelector( listNoBuyersPremiumSelector ).innerText.trim() ) || na ,
-          listVacant          : ( item.querySelector( listVacantSelector          ) && item.querySelector( listVacantSelector          ).innerText.trim() ) || na ,
-        };
-      // }, [ LIST_GROUP, LIST_ADDRESS, ] );
+        const keys = Object.keys(configSelectors);
+        const out = { listDetailUrl: ( item.href || na ) };
+        keys.forEach( key => {
+          out[key] = (
+            item.querySelector( configSelectors[key] ) && 
+            item.querySelector( configSelectors[key] ).innerText.trim()
+          ) || na;
+        })
+        return out;
+      //   const {
+      //     listAddress, listCsz, listAuctionDateRaw, listAuctionType,
+      //     listBeds, listBaths, listSqft, listArv, listReserve,
+      //     listOpeningBid, listNoBuyersPremium, listVacant,
+      //   } = configSelectors;
+      //   return {
+      //     // address: document.querySelector( listAddress ).innerText.trim(),
+      //     // address: $( listAddress ).innerText.trim(),
+      //     // listDetailUrl    : ( item.querySelector( 'div > a' ) && item.querySelector( 'div > a' ).href.trim() ) || 'N/A' , 
+      //     listDetailUrl       : ( item.href || na ) ,
+      //     listAddress         : ( item.querySelector( listAddress         ) && item.querySelector( listAddress         ).innerText.trim() ) || na ,
+      //     listCsz             : ( item.querySelector( listCsz             ) && item.querySelector( listCsz             ).innerText.trim() ) || na ,
+      //     listAuctionDateRaw  : ( item.querySelector( listAuctionDateRaw  ) && item.querySelector( listAuctionDateRaw  ).innerText.trim() ) || na ,
+      //     listAuctionType     : ( item.querySelector( listAuctionType     ) && item.querySelector( listAuctionType     ).innerText.trim() ) || na ,
+      //     listBeds            : ( item.querySelector( listBeds            ) && item.querySelector( listBeds            ).innerText.trim() ) || na ,
+      //     listBaths           : ( item.querySelector( listBaths           ) && item.querySelector( listBaths           ).innerText.trim() ) || na ,
+      //     listSqft            : ( item.querySelector( listSqft            ) && item.querySelector( listSqft            ).innerText.trim() ) || na ,
+      //     listArv             : ( item.querySelector( listArv             ) && item.querySelector( listArv             ).innerText.trim() ) || na ,
+      //     listReserve         : ( item.querySelector( listReserve         ) && item.querySelector( listReserve         ).innerText.trim() ) || na ,
+      //     listOpeningBid      : ( item.querySelector( listOpeningBid      ) && item.querySelector( listOpeningBid      ).innerText.trim() ) || na ,
+      //     listNoBuyersPremium : ( item.querySelector( listNoBuyersPremium ) && item.querySelector( listNoBuyersPremium ).innerText.trim() ) || na ,
+      //     listVacant          : ( item.querySelector( listVacant          ) && item.querySelector( listVacant          ).innerText.trim() ) || na ,
+      //   };
+      // // }, [ LIST_GROUP, LIST_ADDRESS, ] );
       }), [],
   );
 

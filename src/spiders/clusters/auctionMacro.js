@@ -24,7 +24,7 @@ const scriptName = 'auctionMacro'; // node auctionMacro
 // calls auctionList.js
 
 const MAX_STATES_PER_RUN = 1;
-const MAX_PAGES_PER_STATE_PER_RUN = 1; // 5;
+const MAX_PAGES_PER_STATE_PER_RUN = 5; // 1;
 const MAX_CONCURRENCY = 5;
 // const options = { 
 //   slowMo: 1000,
@@ -78,7 +78,7 @@ const runCluster = async statesInQueue => {
   
   const keys = Object.keys(statesInQueue);
   let i = MAX_STATES_PER_RUN; while(i--) {
-    const state = 'WV'; // keys[i];
+    const state = 'WV'; // 'NY'; // keys[i]; // 
     const pageNumber = statesInQueue[state].latestPage + PAGE_INCREMENT;
     const jMax = pageNumber + MAX_PAGES_PER_STATE_PER_RUN;
     for( j = pageNumber; j < jMax; j++ ) {
