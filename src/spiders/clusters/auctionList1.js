@@ -234,55 +234,32 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   // await page.screenshot({path: 'example.png'});
 
   // const items = await page.evaluate( (listGroup, listAddress,) => {
-  const items = await page.evaluate( () =>
+  const items = await page.evaluate( () => {
     // return Array.from( document.querySelectorAll( listGroup ))
     // return Array.from( $$( listGroup ))
     // return Array.from( $$( 'div[data-elm-id="asset_list_content"] > *' ))
     // return Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] > *' )) // fails to capture an anomalous <div> tag that wraps the first and only the first <a> tag
-    Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] a' ))
-      .map( item => {
-        const na = 'N/A';
-        const parentSelector = 'div[class^="styles__asset-container"]';
-        const config = {
-          // listDetailUrlSelector       : , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
-          listAddressSelector         : `${parentSelector} h4[data-elm-id$="_address_content_1"]`            , // 170 GROVE PARK CIRCLE
-          listCszSelector             : `${parentSelector} label[data-elm-id$="_address_content_2"]`         , // DANVILLE, VA 24541, Danville city County
-          listAuctionDateRawSelector  : `${parentSelector} h4[data-elm-id$="_auction_date"]`                 , // Nov 22, 3:00pm
-          listAuctionTypeSelector     : `${parentSelector} label[data-elm-id$="_auction_type"]`              , // Foreclosure Sale, In Person | Bank Owned, Online
-          listBedsSelector            : `${parentSelector} h4[data-elm-id$="_beds"]`                         , // 3
-          listBathsSelector           : `${parentSelector} h4[data-elm-id$="_baths"]`                        , // 2
-          listSqftSelector            : `${parentSelector} h4[data-elm-id$="_sqft"]`                         , // 1,410
-          listArvSelector             : `${parentSelector} h4[data-elm-id="label_after_repair_value_value"]` , // $149,000
-          listReserveSelector         : `${parentSelector} h4[data-elm-id="label_reserve_value"]`            , // $25,000
-          listOpeningBidSelector      : `${parentSelector} h4[data-elm-id="label_starting_bid_value"]`       , // $25,000
-          listNoBuyersPremiumSelector : `${parentSelector} label[data-elm-id$="_No Buyer\'s Premium_label"]` , // No Buyer's Premium
-          listVacantSelector          : `${parentSelector} label[data-elm-id$="_Vacant_label"]`              , // Vacant
-        };
-        const {
-          listAddressSelector, listCszSelector, listAuctionDateRawSelector, listAuctionTypeSelector,
-          listBedsSelector, listBathsSelector, listSqftSelector, listArvSelector, listReserveSelector,
-          listOpeningBidSelector, listNoBuyersPremiumSelector, listVacantSelector,
-        } = config;
-        return {
-          // address: document.querySelector( listAddress ).innerText.trim(),
-          // address: $( listAddress ).innerText.trim(),
-          // listDetailUrl    : ( item.querySelector( 'div > a' ) && item.querySelector( 'div > a' ).href.trim() ) || 'N/A' , 
-          listDetailUrl       : ( item.href || na ) ,
-          listAddress         : ( item.querySelector( listAddressSelector         ) && item.querySelector( listAddressSelector         ).innerText.trim() ) || na ,
-          listCsz             : ( item.querySelector( listCszSelector             ) && item.querySelector( listCszSelector             ).innerText.trim() ) || na ,
-          listAuctionDateRaw  : ( item.querySelector( listAuctionDateRawSelector  ) && item.querySelector( listAuctionDateRawSelector  ).innerText.trim() ) || na ,
-          listAuctionType     : ( item.querySelector( listAuctionTypeSelector     ) && item.querySelector( listAuctionTypeSelector     ).innerText.trim() ) || na ,
-          listBeds            : ( item.querySelector( listBedsSelector            ) && item.querySelector( listBedsSelector            ).innerText.trim() ) || na ,
-          listBaths           : ( item.querySelector( listBathsSelector           ) && item.querySelector( listBathsSelector           ).innerText.trim() ) || na ,
-          listSqft            : ( item.querySelector( listSqftSelector            ) && item.querySelector( listSqftSelector            ).innerText.trim() ) || na ,
-          listArv             : ( item.querySelector( listArvSelector             ) && item.querySelector( listArvSelector             ).innerText.trim() ) || na ,
-          listReserve         : ( item.querySelector( listReserveSelector         ) && item.querySelector( listReserveSelector         ).innerText.trim() ) || na ,
-          listOpeningBid      : ( item.querySelector( listOpeningBidSelector      ) && item.querySelector( listOpeningBidSelector      ).innerText.trim() ) || na ,
-          listNoBuyersPremium : ( item.querySelector( listNoBuyersPremiumSelector ) && item.querySelector( listNoBuyersPremiumSelector ).innerText.trim() ) || na ,
-          listVacant          : ( item.querySelector( listVacantSelector          ) && item.querySelector( listVacantSelector          ).innerText.trim() ) || na ,
-        };
-      // }, [ LIST_GROUP, LIST_ADDRESS, ] );
-      }), [],
+    return Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] a' ))
+      .map( item => ({
+        // address: document.querySelector( listAddress ).innerText.trim(),
+        // address: $( listAddress ).innerText.trim(),
+        // listDetailUrl       : ( item.querySelector( 'div > a'                                                                                ) && item.querySelector( 'div > a'                                                                                ).href     .trim() ) || 'N/A' , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
+        listDetailUrl       : ( item.href || 'N/A' ) ,
+        listAddress         : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_address_content_1"]'            ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_address_content_1"]'            ).innerText.trim() ) || 'N/A' , // 170 GROVE PARK CIRCLE
+        listCsz             : ( item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_address_content_2"]'         ) && item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_address_content_2"]'         ).innerText.trim() ) || 'N/A' , // DANVILLE, VA 24541, Danville city County
+        listAuctionDateRaw  : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_auction_date"]'                 ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_auction_date"]'                 ).innerText.trim() ) || 'N/A' , // Nov 22, 3:00pm
+        listAuctionType     : ( item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_auction_type"]'              ) && item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_auction_type"]'              ).innerText.trim() ) || 'N/A' , // Foreclosure Sale, In Person | Bank Owned, Online
+        listBeds            : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_beds"]'                         ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_beds"]'                         ).innerText.trim() ) || 'N/A' , // 3
+        listBaths           : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_baths"]'                        ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_baths"]'                        ).innerText.trim() ) || 'N/A' , // 2
+        listSqft            : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_sqft"]'                         ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id$="_sqft"]'                         ).innerText.trim() ) || 'N/A' , // 1,410
+        listArv             : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_after_repair_value_value"]' ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_after_repair_value_value"]' ).innerText.trim() ) || 'N/A' , // $149,000
+        listReserve         : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_reserve_value"]'            ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_reserve_value"]'            ).innerText.trim() ) || 'N/A' , // $25,000
+        listOpeningBid      : ( item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_starting_bid_value"]'       ) && item.querySelector( 'div[class^="styles__asset-container"] h4[data-elm-id="label_starting_bid_value"]'       ).innerText.trim() ) || 'N/A' , // $25,000
+        listNoBuyersPremium : ( item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_No Buyer\'s Premium_label"]' ) && item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_No Buyer\'s Premium_label"]' ).innerText.trim() ) || 'N/A' , // No Buyer's Premium
+        listVacant          : ( item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_Vacant_label"]'              ) && item.querySelector( 'div[class^="styles__asset-container"] label[data-elm-id$="_Vacant_label"]'              ).innerText.trim() ) || 'N/A' , // Vacant
+      }))
+    // }, [ LIST_GROUP, LIST_ADDRESS, ] );
+    }, [],
   );
 
   // console.log( 'items\n'       , items        , );

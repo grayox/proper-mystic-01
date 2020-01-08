@@ -133,10 +133,10 @@ const getDbInventory = db => {
   // schedule it
   // if(!isScheduled(scriptName)) return;
 
-  // ref: https://github.com/GoogleChrome/puppeteer
-  // cheatsheet: https://nitayneeman.com/posts/getting-to-know-puppeteer-using-practical-examples/
-  // forms: https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
-  const browser = await puppeteer.launch(options);
+  // // ref: https://github.com/GoogleChrome/puppeteer
+  // // cheatsheet: https://nitayneeman.com/posts/getting-to-know-puppeteer-using-practical-examples/
+  // // forms: https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form
+  // const browser = await puppeteer.launch(options);
 
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
