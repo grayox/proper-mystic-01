@@ -89,8 +89,8 @@ const source = 'auction.com';
 const options = {
   waitUntil: 'load',
 };
-const splitter1 = ' ';
-const splitter2 = ', ';
+const singleSpace = ' ';
+const commaSpace = ', ';
 // const allCommas = /,*/g;
 const nonDigits = /\D*/g;
 const currencyChars = /(\$*,*)/g;
@@ -100,6 +100,7 @@ const defaultResult = null; // useful for writing to firestore // 'N/A'; // usef
 
 const selector = 'div[data-elm-id="asset_list_content"] a';
 const pageFunction = items => {
+  const joiner = ' ';
   const defaultValue = 'N/A';
   const container = 'div[class^="styles__asset-container"]';
   const configSelectors = {
@@ -118,20 +119,36 @@ const pageFunction = items => {
     listVacant          : 'label[data-elm-id$="_Vacant_label"]'              , // Vacant
   };
   const keys = Object.keys(configSelectors);
-  return items.map( item => {
+  const result = items.map( item => {
     const out = { listDetailUrl: ( item.href || defaultValue ) };
     keys.forEach( key => {
-      out[key] = (
-        item.querySelector( `${container} ${configSelectors[key]}` ) && 
-        item.querySelector( `${container} ${configSelectors[key]}` ).innerText.trim()
-      ) || defaultValue;
+      const qSel = [ container, configSelectors[key], ].join( joiner );
+      const itemQSel = item.querySelector( qSel );
+      out[key] = ( itemQSel && itemQSel.innerText.trim()) || defaultValue;
     })
     return out;
   });
+  return result;
 }
 
+const doWriteOut = formattedItems => {
+  // write to GAS
+  if ( isWrite2gas ){
+    const itemsAsCsv = arrayOfObjects2csv(formattedItems);
+    // console.log('itemsAsCsv\n', itemsAsCsv,);
+    write2gas(itemsAsCsv);
+  }
+  // write to firestore db
+  if ( isWrite2db ){
+    const data = {
+      inventoryList: formattedItems,
+    };
+    write2db({ dbConfig, data, });
+  }
+};
+
 const str2num = c => Number(c && c.replace(currencyChars, emptyString,)) || defaultResult;
-const titleCase = s => _.startCase(_.toLower(s));
+const str2titleCase = s => _.startCase(_.toLower(s));
 const milHour = s => {
   // s = '10:00am';
   const pm = 'pm';
@@ -156,7 +173,7 @@ const processDate = s => {
     listAuctionDateDay, listAuctionDateTime,
     listAuctionDateYear, listAuctionDateTimestamp,
   }
-  const split = s.split(splitter1);
+  const split = s.split(singleSpace);
   
   const ready1 = split;
   if(!ready1) return defaultDate;
@@ -204,10 +221,10 @@ const processDate = s => {
   
   // handle hours and minutes
   const hoursMinutesString = (listAuctionDateTime && listAuctionDateTime.toString()) || defaultResult;
-  const listAuctionDateHours = (hoursMinutesString && Number(hoursMinutesString.slice(0, -2))) || defaultResult;
-  const listAuctionDateMinutes = (hoursMinutesString && Number(hoursMinutesString.slice(-2))) || defaultResult;
+  const listAuctionDateHours = (hoursMinutesString && Number(hoursMinutesString.slice( 0, -2, ))) || defaultResult;
+  const listAuctionDateMinutes = (hoursMinutesString && Number(hoursMinutesString.slice( -2 ))) || defaultResult;
   
-  const listAuctionDateDate = new Date(
+  const listAuctionDateDate = new Date (
     listAuctionDateYear, listAuctionDateMonthNumberRaw, listAuctionDateDay,
     listAuctionDateHours, listAuctionDateMinutes,
   );
@@ -223,20 +240,20 @@ const processDate = s => {
   return out;
 }
 
-const getFormattedItems = ( url, items, ) => items.map( item => {
+const formatItems = ( url, items, ) => items.map( item => {
   // const listDetailUrl = `https://www.auction.com${item.listDetailUrl}`;
-  // const listCsz = titleCase(item.listCsz); // reformats state undesirably
-  const listAddress = (titleCase(item.listAddress)) || defaultResult;
+  // const listCsz = str2titleCase(item.listCsz); // reformats state undesirably
+  const listAddress = (str2titleCase(item.listAddress)) || defaultResult;
   console.log('listAddress', listAddress,);
-  const listCszSplit = (item.listCsz && item.listCsz.split(splitter2)) || defaultResult;
-  const listCity = (listCszSplit && titleCase(listCszSplit[0])) || defaultResult;
-  const listCounty = (listCszSplit && titleCase(listCszSplit[2])) || defaultResult;
+  const listCszSplit = (item.listCsz && item.listCsz.split(commaSpace)) || defaultResult;
+  const listCity = (listCszSplit && str2titleCase(listCszSplit[0])) || defaultResult;
+  const listCounty = (listCszSplit && str2titleCase(listCszSplit[2])) || defaultResult;
   const listStateZip = (listCszSplit && listCszSplit[1]) || defaultResult;
-  const listStateZipSplit = (listStateZip && listStateZip.split(splitter1)) || defaultResult;
+  const listStateZipSplit = (listStateZip && listStateZip.split(singleSpace)) || defaultResult;
   const listState = (listStateZipSplit && listStateZipSplit[0]) || defaultResult;
   console.log('listState', listState,);
   const listZip = (listStateZipSplit && listStateZipSplit[1]) || defaultResult;
-  // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(splitter1)) || defaultResult;
+  // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(singleSpace)) || defaultResult;
   // const listAuctionDateMonthText = (listAuctionDateSplit && listAuctionDateSplit[0] && listAuctionDateSplit[0].replace(allCommas, emptyString,)) || defaultResult;
   // const listAuctionDateMonthNumber = (monthsArray.indexOf(listAuctionDateMonthText) + 1) || defaultResult;
   // const listAuctionDateDay = (listAuctionDateSplit && str2num(listAuctionDateSplit[1])) || defaultResult;
@@ -248,7 +265,7 @@ const getFormattedItems = ( url, items, ) => items.map( item => {
     listAuctionDateDate, listAuctionDateTimestamp,
   } = processedDate;
   // const listAuctionDateTimestamp = new Date(2018, 11, 24, 10, 33, 30, 0);
-  const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(splitter2)) || defaultResult;
+  const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(commaSpace)) || defaultResult;
   const listForeclosureOrBankOwned = (listAuctionTypeSplit && listAuctionTypeSplit[0]) || defaultResult;
   const listInPersonOrOnline = (listAuctionTypeSplit && listAuctionTypeSplit[1]) || defaultResult;
   const listArv = (item.listArv && str2num(item.listArv)) || defaultResult;
@@ -413,25 +430,10 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   // await browser.close();
 
   // compute and format items
-  const formattedItems = getFormattedItems( url, items, );
+  const formattedItems = formatItems( url, items, );
   // console.log('formattedItems\n', formattedItems,);
 
-  // [ BEGIN write to GAS ]
-  if ( isWrite2gas ){
-    const itemsAsCsv = arrayOfObjects2csv(formattedItems);
-    // console.log('itemsAsCsv\n', itemsAsCsv,);
-    write2gas(itemsAsCsv);
-  }
-  // [ END write to GAS ]
-
-  // [ BEGIN write to firestore db ]
-  if ( isWrite2db ){
-    const data = {
-      inventoryList: formattedItems,
-    };
-    write2db({ dbConfig, data, });
-  }
-  // [ END write to firestore db ]
+  doWriteOut(formattedItems);
 
 };
 
