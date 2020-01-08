@@ -83,6 +83,196 @@ const getUrl = ( state, pageNumber = 1, ) =>
   // page 2   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/2_cp/y_nbs/'
   // page 3   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/3_cp/y_nbs/'
 
+const isWrite2db = true;
+const isWrite2gas = false;
+const source = 'auction.com';
+const options = {
+  waitUntil: 'load',
+};
+const splitter1 = ' ';
+const splitter2 = ', ';
+// const allCommas = /,*/g;
+const nonDigits = /\D*/g;
+const currencyChars = /(\$*,*)/g;
+// const joiner = '-';
+const emptyString = '';
+const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
+
+const selector = 'div[data-elm-id="asset_list_content"] a';
+const pageFunction = items => {
+  const defaultValue = 'N/A';
+  const container = 'div[class^="styles__asset-container"]';
+  const configSelectors = {
+    // listDetailUrlSelector: , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
+    listAddress         : 'h4[data-elm-id$="_address_content_1"]'            , // 170 GROVE PARK CIRCLE
+    listCsz             : 'label[data-elm-id$="_address_content_2"]'         , // DANVILLE, VA 24541, Danville city County
+    listAuctionDateRaw  : 'h4[data-elm-id$="_auction_date"]'                 , // Nov 22, 3:00pm
+    listAuctionType     : 'label[data-elm-id$="_auction_type"]'              , // Foreclosure Sale, In Person | Bank Owned, Online
+    listBeds            : 'h4[data-elm-id$="_beds"]'                         , // 3
+    listBaths           : 'h4[data-elm-id$="_baths"]'                        , // 2
+    listSqft            : 'h4[data-elm-id$="_sqft"]'                         , // 1,410
+    listArv             : 'h4[data-elm-id="label_after_repair_value_value"]' , // $149,000
+    listReserve         : 'h4[data-elm-id="label_reserve_value"]'            , // $25,000
+    listOpeningBid      : 'h4[data-elm-id="label_starting_bid_value"]'       , // $25,000
+    listNoBuyersPremium : 'label[data-elm-id$="_No Buyer\'s Premium_label"]' , // No Buyer's Premium
+    listVacant          : 'label[data-elm-id$="_Vacant_label"]'              , // Vacant
+  };
+  const keys = Object.keys(configSelectors);
+  return items.map( item => {
+    const out = { listDetailUrl: ( item.href || defaultValue ) };
+    keys.forEach( key => {
+      out[key] = (
+        item.querySelector( `${container} ${configSelectors[key]}` ) && 
+        item.querySelector( `${container} ${configSelectors[key]}` ).innerText.trim()
+      ) || defaultValue;
+    })
+    return out;
+  });
+}
+
+const str2num = c => Number(c && c.replace(currencyChars, emptyString,)) || defaultResult;
+const titleCase = s => _.startCase(_.toLower(s));
+const milHour = s => {
+  // s = '10:00am';
+  const pm = 'pm';
+  const ampmSlice = -2;
+  const pmAdder = 1200;
+  const ampm = s.slice(ampmSlice);
+  const lowercaseAmpm = ampm.toLowerCase();
+  const isPm = ( lowercaseAmpm == pm );
+  const pmAdj = isPm * pmAdder;
+  const baseHrStr = s.replace(nonDigits, emptyString,);
+  const baseHrNum = parseInt(baseHrStr);
+  const out = baseHrNum + pmAdj;
+  return out;
+}
+
+const processDate = s => {
+  let listAuctionDateMonthText = listAuctionDateTimestamp = listAuctionDateMonthNumber =
+    listAuctionDateYear = listAuctionDateDay = listAuctionDateTime = defaultResult;
+  listAuctionDateYear = todaysYear;
+  const defaultDate = {
+    listAuctionDateMonthText, listAuctionDateMonthNumber,
+    listAuctionDateDay, listAuctionDateTime,
+    listAuctionDateYear, listAuctionDateTimestamp,
+  }
+  const split = s.split(splitter1);
+  
+  const ready1 = split;
+  if(!ready1) return defaultDate;
+
+  const splitLength = split && split.length;
+  
+  const ready2 = !!splitLength;
+  if(!ready2) return defaultDate;
+
+  switch( splitLength ) {
+    case 3 :
+      // s = 'Nov 26, 10:00am'
+      listAuctionDateDay = str2num(split[1]) || defaultResult;
+      listAuctionDateTime = milHour(split[2]) || defaultResult;
+      break;
+    case 4 :
+      // s = 'Nov 19 - 21' // time: Nov 21, 12:01 AM
+      // listAuctionDateDay = str2num(split[3]) || defaultResult; // end of auction
+      listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
+      listAuctionDateTime = 0;
+      break;
+    case 7 :
+      // s = 'Dec 31, 2019 - Jan 2, 2020'
+      // listAuctionDateDay = str2num(split[3]) || defaultResult; // end of auction
+      listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
+      listAuctionDateTime = 0;
+      break;
+    default:
+      // listAuctionDateDay = listAuctionDateTime = defaultResult;
+  }
+  
+  // handle month and year
+  listAuctionDateMonthText = split[0];
+  const listAuctionDateMonthNumberRaw = monthsArray.indexOf(listAuctionDateMonthText) || defaultResult;
+  listAuctionDateMonthNumber = ( listAuctionDateMonthNumberRaw === -1 )
+    ? defaultResult : (listAuctionDateMonthNumberRaw + 1);
+  // edge case: last week of the year
+  // increment year if currently december and auction month is january
+  // // if((todaysMonthOneIndex === 11) && (listAuctionDateMonthNumber < 3)) {
+  const dateYearReady1 = !!listAuctionDateMonthNumber;
+  const dateYearReady2 = ( todaysMonthOneIndex - listAuctionDateMonthNumber ) > 6;
+  const dateYearReady3 = dateYearReady1 && dateYearReady2;
+  if( !dateYearReady1 ) listAuctionDateYear = defaultResult;
+  else if ( dateYearReady3 ) listAuctionDateYear = listAuctionDateYear + 1;
+  
+  // handle hours and minutes
+  const hoursMinutesString = (listAuctionDateTime && listAuctionDateTime.toString()) || defaultResult;
+  const listAuctionDateHours = (hoursMinutesString && Number(hoursMinutesString.slice(0, -2))) || defaultResult;
+  const listAuctionDateMinutes = (hoursMinutesString && Number(hoursMinutesString.slice(-2))) || defaultResult;
+  
+  const listAuctionDateDate = new Date(
+    listAuctionDateYear, listAuctionDateMonthNumberRaw, listAuctionDateDay,
+    listAuctionDateHours, listAuctionDateMinutes,
+  );
+  // console.log('listAuctionDateDate', listAuctionDateDate);
+  listAuctionDateTimestamp = listAuctionDateDate.getTime();
+  // console.log('listAuctionDateTimestamp', listAuctionDateTimestamp);
+  
+  const out = {
+    listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
+    listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
+    listAuctionDateDate, listAuctionDateTimestamp,
+  };
+  return out;
+}
+
+const getFormattedItems = ( url, items, ) => items.map( item => {
+  // const listDetailUrl = `https://www.auction.com${item.listDetailUrl}`;
+  // const listCsz = titleCase(item.listCsz); // reformats state undesirably
+  const listAddress = (titleCase(item.listAddress)) || defaultResult;
+  console.log('listAddress', listAddress,);
+  const listCszSplit = (item.listCsz && item.listCsz.split(splitter2)) || defaultResult;
+  const listCity = (listCszSplit && titleCase(listCszSplit[0])) || defaultResult;
+  const listCounty = (listCszSplit && titleCase(listCszSplit[2])) || defaultResult;
+  const listStateZip = (listCszSplit && listCszSplit[1]) || defaultResult;
+  const listStateZipSplit = (listStateZip && listStateZip.split(splitter1)) || defaultResult;
+  const listState = (listStateZipSplit && listStateZipSplit[0]) || defaultResult;
+  console.log('listState', listState,);
+  const listZip = (listStateZipSplit && listStateZipSplit[1]) || defaultResult;
+  // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(splitter1)) || defaultResult;
+  // const listAuctionDateMonthText = (listAuctionDateSplit && listAuctionDateSplit[0] && listAuctionDateSplit[0].replace(allCommas, emptyString,)) || defaultResult;
+  // const listAuctionDateMonthNumber = (monthsArray.indexOf(listAuctionDateMonthText) + 1) || defaultResult;
+  // const listAuctionDateDay = (listAuctionDateSplit && str2num(listAuctionDateSplit[1])) || defaultResult;
+  // const listAuctionDateTime = (listAuctionDateSplit && listAuctionDateSplit[2]) || defaultResult;
+  const processedDate = processDate(item.listAuctionDateRaw);
+  const {
+    listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
+    listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
+    listAuctionDateDate, listAuctionDateTimestamp,
+  } = processedDate;
+  // const listAuctionDateTimestamp = new Date(2018, 11, 24, 10, 33, 30, 0);
+  const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(splitter2)) || defaultResult;
+  const listForeclosureOrBankOwned = (listAuctionTypeSplit && listAuctionTypeSplit[0]) || defaultResult;
+  const listInPersonOrOnline = (listAuctionTypeSplit && listAuctionTypeSplit[1]) || defaultResult;
+  const listArv = (item.listArv && str2num(item.listArv)) || defaultResult;
+  const listReserve = (item.listReserve && str2num(item.listReserve)) || defaultResult;
+  const listOpeningBid = (item.listOpeningBid && str2num(item.listOpeningBid)) || defaultResult;
+  const listBeds  = (item.listBeds  && Number(item.listBeds))  || defaultResult;
+  const listBaths = (item.listBaths && Number(item.listBaths)) || defaultResult;
+  const listSqft  = (item.listSqft  && str2num(item.listSqft)) || defaultResult;
+  const isCurrent = getIsCurrent(listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,);
+  const out = {
+    // meta data
+    timestamp, source, isCurrent, listUrl: url, hasAgent: false, // market,
+    // basic facts
+    ...item, listTimestamp: timestamp, listBeds, listBaths, listSqft,
+    listAddress, listCity, listState, listZip, listCounty, // listCsz, listDetailUrl, 
+    listForeclosureOrBankOwned, listInPersonOrOnline, listArv, listReserve, listOpeningBid,
+    // date timeline
+    listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
+    listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
+    listAuctionDateDate, listAuctionDateTimestamp,
+  };
+  return isCurrent && out;
+});
+
 module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   console.log('state', state,);
   console.log('pageNumber', pageNumber,);
@@ -90,24 +280,6 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   // // schedule it
   // if(!isScheduled(scriptName)) return;
 
-  const isWrite2db = true;
-  const isWrite2gas = false;
-  const url = getUrl( state, pageNumber, );
-  // console.log('url', url,); return;
-  // const market = [ 'us', state, ].join(joiner).toLowerCase();
-  const source = 'auction.com';
-  const options = {
-    waitUntil: 'load',
-  };
-  const splitter1 = ' ';
-  const splitter2 = ', ';
-  // const allCommas = /,*/g;
-  const nonDigits = /\D*/g;
-  const currencyChars = /(\$*,*)/g;
-  // const joiner = '-';
-  const emptyString = '';
-  const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
-  
   // const arrayOfObjects2csv = items => {
   //   // ref: https://stackoverflow.com/a/31536517
   //   // const items = json3.items;
@@ -229,220 +401,19 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
 
   // const page = await browser.newPage();
   // await page.goto('https://example.com');
+  const url = getUrl( state, pageNumber, );
+  // console.log('url', url,); return;
+  // // const market = [ 'us', state, ].join(joiner).toLowerCase();
   await page.goto( url, options, );
-  // docs: https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md
-  // await page.screenshot({path: 'example.png'});
-
-  // const items = await page.evaluate( (listGroup, listAddress,) => {
-  const items = await page.evaluate( () =>
-    // return Array.from( document.querySelectorAll( listGroup ))
-    // return Array.from( $$( listGroup ))
-    // return Array.from( $$( 'div[data-elm-id="asset_list_content"] > *' ))
-    // return Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] > *' )) // fails to capture an anomalous <div> tag that wraps the first and only the first <a> tag
-    Array.from( document.querySelectorAll( 'div[data-elm-id="asset_list_content"] a' ))
-      .map( item => {
-        const na = 'N/A';
-        const container = 'div[class^="styles__asset-container"]';
-        const configSelectors = {
-          // listDetailUrlSelector: , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
-          listAddress         : `${container} h4[data-elm-id$="_address_content_1"]`            , // 170 GROVE PARK CIRCLE
-          listCsz             : `${container} label[data-elm-id$="_address_content_2"]`         , // DANVILLE, VA 24541, Danville city County
-          listAuctionDateRaw  : `${container} h4[data-elm-id$="_auction_date"]`                 , // Nov 22, 3:00pm
-          listAuctionType     : `${container} label[data-elm-id$="_auction_type"]`              , // Foreclosure Sale, In Person | Bank Owned, Online
-          listBeds            : `${container} h4[data-elm-id$="_beds"]`                         , // 3
-          listBaths           : `${container} h4[data-elm-id$="_baths"]`                        , // 2
-          listSqft            : `${container} h4[data-elm-id$="_sqft"]`                         , // 1,410
-          listArv             : `${container} h4[data-elm-id="label_after_repair_value_value"]` , // $149,000
-          listReserve         : `${container} h4[data-elm-id="label_reserve_value"]`            , // $25,000
-          listOpeningBid      : `${container} h4[data-elm-id="label_starting_bid_value"]`       , // $25,000
-          listNoBuyersPremium : `${container} label[data-elm-id$="_No Buyer\'s Premium_label"]` , // No Buyer's Premium
-          listVacant          : `${container} label[data-elm-id$="_Vacant_label"]`              , // Vacant
-        };
-        const keys = Object.keys(configSelectors);
-        const out = { listDetailUrl: ( item.href || na ) };
-        keys.forEach( key => {
-          out[key] = (
-            item.querySelector( configSelectors[key] ) && 
-            item.querySelector( configSelectors[key] ).innerText.trim()
-          ) || na;
-        })
-        return out;
-      //   const {
-      //     listAddress, listCsz, listAuctionDateRaw, listAuctionType,
-      //     listBeds, listBaths, listSqft, listArv, listReserve,
-      //     listOpeningBid, listNoBuyersPremium, listVacant,
-      //   } = configSelectors;
-      //   return {
-      //     // address: document.querySelector( listAddress ).innerText.trim(),
-      //     // address: $( listAddress ).innerText.trim(),
-      //     // listDetailUrl    : ( item.querySelector( 'div > a' ) && item.querySelector( 'div > a' ).href.trim() ) || 'N/A' , 
-      //     listDetailUrl       : ( item.href || na ) ,
-      //     listAddress         : ( item.querySelector( listAddress         ) && item.querySelector( listAddress         ).innerText.trim() ) || na ,
-      //     listCsz             : ( item.querySelector( listCsz             ) && item.querySelector( listCsz             ).innerText.trim() ) || na ,
-      //     listAuctionDateRaw  : ( item.querySelector( listAuctionDateRaw  ) && item.querySelector( listAuctionDateRaw  ).innerText.trim() ) || na ,
-      //     listAuctionType     : ( item.querySelector( listAuctionType     ) && item.querySelector( listAuctionType     ).innerText.trim() ) || na ,
-      //     listBeds            : ( item.querySelector( listBeds            ) && item.querySelector( listBeds            ).innerText.trim() ) || na ,
-      //     listBaths           : ( item.querySelector( listBaths           ) && item.querySelector( listBaths           ).innerText.trim() ) || na ,
-      //     listSqft            : ( item.querySelector( listSqft            ) && item.querySelector( listSqft            ).innerText.trim() ) || na ,
-      //     listArv             : ( item.querySelector( listArv             ) && item.querySelector( listArv             ).innerText.trim() ) || na ,
-      //     listReserve         : ( item.querySelector( listReserve         ) && item.querySelector( listReserve         ).innerText.trim() ) || na ,
-      //     listOpeningBid      : ( item.querySelector( listOpeningBid      ) && item.querySelector( listOpeningBid      ).innerText.trim() ) || na ,
-      //     listNoBuyersPremium : ( item.querySelector( listNoBuyersPremium ) && item.querySelector( listNoBuyersPremium ).innerText.trim() ) || na ,
-      //     listVacant          : ( item.querySelector( listVacant          ) && item.querySelector( listVacant          ).innerText.trim() ) || na ,
-      //   };
-      // // }, [ LIST_GROUP, LIST_ADDRESS, ] );
-      }), [],
-  );
-
+  const items = await page.$$eval( selector, pageFunction, );
+ 
   // console.log( 'items\n'       , items        , );
   // console.log( 'items count: ' , items.length , );
 
   // await browser.close();
 
-  const str2num = c => Number(c && c.replace(currencyChars, emptyString,)) || defaultResult;
-  const titleCase = s => _.startCase(_.toLower(s));
-  const milHour = s => {
-    // s = '10:00am';
-    const pm = 'pm';
-    const ampmSlice = -2;
-    const pmAdder = 1200;
-    const ampm = s.slice(ampmSlice);
-    const lowercaseAmpm = ampm.toLowerCase();
-    const isPm = ( lowercaseAmpm == pm );
-    const pmAdj = isPm * pmAdder;
-    const baseHrStr = s.replace(nonDigits, emptyString,);
-    const baseHrNum = parseInt(baseHrStr);
-    const out = baseHrNum + pmAdj;
-    return out;
-  }
-
-  const processDate = s => {
-    let listAuctionDateMonthText = listAuctionDateTimestamp = listAuctionDateMonthNumber =
-      listAuctionDateYear = listAuctionDateDay = listAuctionDateTime = defaultResult;
-    listAuctionDateYear = todaysYear;
-    const defaultDate = {
-      listAuctionDateMonthText, listAuctionDateMonthNumber,
-      listAuctionDateDay, listAuctionDateTime,
-      listAuctionDateYear, listAuctionDateTimestamp,
-    }
-    const split = s.split(splitter1);
-    
-    const ready1 = split;
-    if(!ready1) return defaultDate;
-
-    const splitLength = split && split.length;
-    
-    const ready2 = !!splitLength;
-    if(!ready2) return defaultDate;
-
-    switch( splitLength ) {
-      case 3 :
-        // s = 'Nov 26, 10:00am'
-        listAuctionDateDay = str2num(split[1]) || defaultResult;
-        listAuctionDateTime = milHour(split[2]) || defaultResult;
-        break;
-      case 4 :
-        // s = 'Nov 19 - 21' // time: Nov 21, 12:01 AM
-        // listAuctionDateDay = str2num(split[3]) || defaultResult; // end of auction
-        listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
-        listAuctionDateTime = 0;
-        break;
-      case 7 :
-        // s = 'Dec 31, 2019 - Jan 2, 2020'
-        // listAuctionDateDay = str2num(split[3]) || defaultResult; // end of auction
-        listAuctionDateDay = str2num(split[1]) || defaultResult; // start of auction
-        listAuctionDateTime = 0;
-        break;
-      default:
-        // listAuctionDateDay = listAuctionDateTime = defaultResult;
-    }
-    
-    // handle month and year
-    listAuctionDateMonthText = split[0];
-    const listAuctionDateMonthNumberRaw = monthsArray.indexOf(listAuctionDateMonthText) || defaultResult;
-    listAuctionDateMonthNumber = ( listAuctionDateMonthNumberRaw === -1 )
-      ? defaultResult : (listAuctionDateMonthNumberRaw + 1);
-    // edge case: last week of the year
-    // increment year if currently december and auction month is january
-    // // if((todaysMonthOneIndex === 11) && (listAuctionDateMonthNumber < 3)) {
-    const dateYearReady1 = !!listAuctionDateMonthNumber;
-    const dateYearReady2 = ( todaysMonthOneIndex - listAuctionDateMonthNumber ) > 6;
-    const dateYearReady3 = dateYearReady1 && dateYearReady2;
-    if( !dateYearReady1 ) listAuctionDateYear = defaultResult;
-    else if ( dateYearReady3 ) listAuctionDateYear = listAuctionDateYear + 1;
-    
-    // handle hours and minutes
-    const hoursMinutesString = (listAuctionDateTime && listAuctionDateTime.toString()) || defaultResult;
-    const listAuctionDateHours = (hoursMinutesString && Number(hoursMinutesString.slice(0, -2))) || defaultResult;
-    const listAuctionDateMinutes = (hoursMinutesString && Number(hoursMinutesString.slice(-2))) || defaultResult;
-    
-    const listAuctionDateDate = new Date(
-      listAuctionDateYear, listAuctionDateMonthNumberRaw, listAuctionDateDay,
-      listAuctionDateHours, listAuctionDateMinutes,
-    );
-    // console.log('listAuctionDateDate', listAuctionDateDate);
-    listAuctionDateTimestamp = listAuctionDateDate.getTime();
-    // console.log('listAuctionDateTimestamp', listAuctionDateTimestamp);
-    
-    const out = {
-      listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
-      listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
-      listAuctionDateDate, listAuctionDateTimestamp,
-    };
-    return out;
-  }
-
   // compute and format items
-  const formattedItems = items.map( item => {
-    // const listDetailUrl = `https://www.auction.com${item.listDetailUrl}`;
-    // const listCsz = titleCase(item.listCsz); // reformats state undesirably
-    const listAddress = (titleCase(item.listAddress)) || defaultResult;
-    console.log('listAddress', listAddress,);
-    const listCszSplit = (item.listCsz && item.listCsz.split(splitter2)) || defaultResult;
-    const listCity = (listCszSplit && titleCase(listCszSplit[0])) || defaultResult;
-    const listCounty = (listCszSplit && titleCase(listCszSplit[2])) || defaultResult;
-    const listStateZip = (listCszSplit && listCszSplit[1]) || defaultResult;
-    const listStateZipSplit = (listStateZip && listStateZip.split(splitter1)) || defaultResult;
-    const listState = (listStateZipSplit && listStateZipSplit[0]) || defaultResult;
-    console.log('listState', listState,);
-    const listZip = (listStateZipSplit && listStateZipSplit[1]) || defaultResult;
-    // const listAuctionDateSplit = (item.listAuctionDateRaw && item.listAuctionDateRaw.split(splitter1)) || defaultResult;
-    // const listAuctionDateMonthText = (listAuctionDateSplit && listAuctionDateSplit[0] && listAuctionDateSplit[0].replace(allCommas, emptyString,)) || defaultResult;
-    // const listAuctionDateMonthNumber = (monthsArray.indexOf(listAuctionDateMonthText) + 1) || defaultResult;
-    // const listAuctionDateDay = (listAuctionDateSplit && str2num(listAuctionDateSplit[1])) || defaultResult;
-    // const listAuctionDateTime = (listAuctionDateSplit && listAuctionDateSplit[2]) || defaultResult;
-    const processedDate = processDate(item.listAuctionDateRaw);
-    const {
-      listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
-      listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
-      listAuctionDateDate, listAuctionDateTimestamp,
-    } = processedDate;
-    // const listAuctionDateTimestamp = new Date(2018, 11, 24, 10, 33, 30, 0);
-    const listAuctionTypeSplit = (item.listAuctionType && item.listAuctionType.split(splitter2)) || defaultResult;
-    const listForeclosureOrBankOwned = (listAuctionTypeSplit && listAuctionTypeSplit[0]) || defaultResult;
-    const listInPersonOrOnline = (listAuctionTypeSplit && listAuctionTypeSplit[1]) || defaultResult;
-    const listArv = (item.listArv && str2num(item.listArv)) || defaultResult;
-    const listReserve = (item.listReserve && str2num(item.listReserve)) || defaultResult;
-    const listOpeningBid = (item.listOpeningBid && str2num(item.listOpeningBid)) || defaultResult;
-    const listBeds  = (item.listBeds  && Number(item.listBeds))  || defaultResult;
-    const listBaths = (item.listBaths && Number(item.listBaths)) || defaultResult;
-    const listSqft  = (item.listSqft  && str2num(item.listSqft)) || defaultResult;
-    const isCurrent = getIsCurrent(listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,);
-    const out = {
-      // meta data
-      timestamp, source, isCurrent, listUrl: url, hasAgent: false, // market,
-      // basic facts
-      ...item, listTimestamp: timestamp, listBeds, listBaths, listSqft,
-      listAddress, listCity, listState, listZip, listCounty, // listCsz, listDetailUrl, 
-      listForeclosureOrBankOwned, listInPersonOrOnline, listArv, listReserve, listOpeningBid,
-      // date timeline
-      listAuctionDateYear, listAuctionDateMonthText, listAuctionDateMonthNumber,
-      listAuctionDateDay, listAuctionDateTime, listAuctionDateHours, listAuctionDateMinutes,
-      listAuctionDateDate, listAuctionDateTimestamp,
-    };
-    return isCurrent && out;
-  })
-
+  const formattedItems = getFormattedItems( url, items, );
   // console.log('formattedItems\n', formattedItems,);
 
   // [ BEGIN write to GAS ]
