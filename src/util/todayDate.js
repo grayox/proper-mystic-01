@@ -23,10 +23,10 @@ const getFormattedDate = () => {
   const twoDigitDay = ( todaysDayOfTheMonthStringLength === targetLength )
     ? todaysDayOfTheMonthString : `0${todaysDayOfTheMonthString}`;
   const out = [ todaysYear, twoDigitMonth, twoDigitDay, ].join(joiner);
-  return out; // '2020-01-05'
+  return out; // '2020-01-23'
 }
 
-const formattedDate = getFormattedDate(); // formattedDate
+const formattedDate = getFormattedDate(); // '2020-01-23'
 
 const out = {
   monthsArray, timestamp, todaysDate, todaysYear, formattedDate,

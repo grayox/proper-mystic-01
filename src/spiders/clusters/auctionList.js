@@ -19,7 +19,8 @@ const scriptName = 'auctionList';
 
 const {
   // todaysDate, todaysMonth,
-  monthsArray, timestamp, todaysDayOfTheMonth, todaysMonthOneIndex, todaysYear,
+  monthsArray, timestamp, formattedDate,
+  todaysDayOfTheMonth, todaysMonthOneIndex, todaysYear,
 } = todayDate;
 
 const dbConfig = {
@@ -27,6 +28,10 @@ const dbConfig = {
   inventoryList: {
     collection: 'inventory',
     // doc: getLocationIndex(config), // 'us-va-virginia-beach'
+  },
+  stats: {
+    collection: 'stats',
+    doc: formattedDate,
   },
   // parsedUrls: {
   //   collection: 'domains',
@@ -87,6 +92,7 @@ const isWrite2db = true;
 const isWrite2gas = false;
 const source = 'auction.com';
 const options = {
+  timeout: 45000, // default: 30000; 0 turns it off
   waitUntil: 'load',
 };
 const singleSpace = ' ';
@@ -118,20 +124,20 @@ const pageFunction = items => {
     listNoBuyersPremium : 'label[data-elm-id$="_No Buyer\'s Premium_label"]' , // No Buyer's Premium
     listVacant          : 'label[data-elm-id$="_Vacant_label"]'              , // Vacant
   };
-  const keys = Object.keys(configSelectors);
+  const keys = Object.keys( configSelectors );
   const result = items.map( item => {
-    const out = { listDetailUrl: ( item.href || defaultValue ) };
+    const out = { listDetailUrl: ( item.href || defaultValue )};
     keys.forEach( key => {
-      const qSel = [ container, configSelectors[key], ].join( joiner );
-      const itemQSel = item.querySelector( qSel );
-      out[key] = ( itemQSel && itemQSel.innerText.trim()) || defaultValue;
+      const qSel = [ container, configSelectors[key], ].join(joiner);
+      const itemQSel = item.querySelector(qSel);
+      out[key] = (itemQSel && itemQSel.innerText.trim()) || defaultValue;
     })
     return out;
   });
   return result;
 }
 
-const doWriteOut = formattedItems => {
+const doWriteOut = ( formattedItems, stats, ) => {
   // write to GAS
   if ( isWrite2gas ){
     const itemsAsCsv = arrayOfObjects2csv(formattedItems);
@@ -141,7 +147,7 @@ const doWriteOut = formattedItems => {
   // write to firestore db
   if ( isWrite2db ){
     const data = {
-      inventoryList: formattedItems,
+      stats, inventoryList: formattedItems,
     };
     write2db({ dbConfig, data, });
   }
@@ -241,6 +247,7 @@ const processDate = s => {
 }
 
 const formatItems = ( url, items, ) => items.map( item => {
+  // filters for current items only
   // const listDetailUrl = `https://www.auction.com${item.listDetailUrl}`;
   // const listCsz = str2titleCase(item.listCsz); // reformats state undesirably
   const listAddress = (str2titleCase(item.listAddress)) || defaultResult;
@@ -277,7 +284,7 @@ const formatItems = ( url, items, ) => items.map( item => {
   const isCurrent = getIsCurrent(listAuctionDateDay, listAuctionDateMonthNumber, listAuctionDateYear,);
   const out = {
     // meta data
-    timestamp, source, isCurrent, listUrl: url, hasAgent: false, // market,
+    source, timestamp, isCurrent, formattedDate, listUrl: url, hasAgent: false, // market,
     // basic facts
     ...item, listTimestamp: timestamp, listBeds, listBaths, listSqft,
     listAddress, listCity, listState, listZip, listCounty, // listCsz, listDetailUrl, 
@@ -433,8 +440,16 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   const formattedItems = formatItems( url, items, );
   // console.log('formattedItems\n', formattedItems,);
 
-  doWriteOut(formattedItems);
-
+  // callback
+  const itemsCount = items.length;
+  // const currentItems = formattedItems.length;
+  // const out = { state, pageNumber, itemsCount, currentItems, };
+  // console.log('out', out,);
+  // return out;
+  const stats = {};
+  stats[state] = { latestPage: pageNumber, };
+  if(!itemsCount) stats[state].isActive = stats[state].isCurrent = false; // encountered page with no data
+  doWriteOut( formattedItems, stats, );
 };
 
 // node scrape.js

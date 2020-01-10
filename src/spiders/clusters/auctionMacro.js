@@ -84,7 +84,9 @@ const runCluster = async statesInQueue => {
     for( j = pageNumber; j < jMax; j++ ) {
       const item = { state, pageNumber: j, };
       // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
-      cluster.queue( item, auctionList, );
+      await cluster.queue( item, auctionList, );
+      // const scrape = await cluster.queue( item, auctionList, );
+      // console.log('scrape', scrape,); // undefined
     }
   }
 

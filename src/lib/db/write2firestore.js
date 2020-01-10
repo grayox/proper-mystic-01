@@ -28,6 +28,7 @@ module.exports = async ({
     parsedUrls=false,
     // source: 'auction'
     inventoryList=false,
+    stats=false,
     // source: 'form'
     formList=false,
     // source: 'contact'
@@ -81,8 +82,15 @@ module.exports = async ({
       const inventoryRef = db
         .collection(dbConfig.inventoryList.collection) // 'inventory'
         .doc(item.listDetailUrl.split(slash).slice(-1)[0]); // '255-county-club-drive-eden-nc-27288-2850751-e_13836' < 'https://www.auction.com/details/255-county-club-drive-eden-nc-27288-2850751-e_13836'
-      batch.set(inventoryRef, item, merge,);
-    })
+      batch.set( inventoryRef, item, merge, );
+    });
+    if( stats ) {
+      console.log('stats', stats,);
+      const statsRef = db
+        .collection(dbConfig.stats.collection) // 'stats'
+        .doc(dbConfig.stats.doc); // 2020-01-19
+      batch.set( statsRef, stats, merge, );
+    }
   }
 
   if(source === 'form') {
