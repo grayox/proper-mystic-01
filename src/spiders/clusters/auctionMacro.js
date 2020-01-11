@@ -18,6 +18,13 @@ const getStatesList = require('../../lib/geoData/getStatesList.js');
 
 const getDb = require('../../lib/db/getDb');
 const todayDate = require('../../util/todayDate');
+const write2db = require('../../lib/db/write2firestore');
+
+// increment counters
+// ref: https://firebase.google.com/docs/firestore/manage-data/add-data#increment_a_numeric_value
+// ref: https://fireship.io/snippets/firestore-increment-tips/
+const admin = require('firebase-admin');
+const incrementer = admin.firestore.FieldValue;
 
 // start here
 const scriptName = 'auctionMacro'; // node auctionMacro
@@ -31,9 +38,12 @@ const MAX_CONCURRENCY = 5;
 //   // headless: false,
 // };
 const stateInitObject = {
-  latestPage: 0,
   isActive: true, // all states not yet scraped today
   isCurrent: false, // current state to scrape
+  pagesAttempted: 0, // total pages attempted to be scraped
+  pagesCount: 0, // total count of pages with data we successfully captured
+  itemsCount: 0, // total number of items captured from pages with data
+  currentItems: 0, // total number of captured items that are current
 };
 
 // do not change
@@ -48,13 +58,25 @@ const getStatesInit = () => {
   return out;
 };
 
-const addNewCurrentState = states => {
-  const keys = Object.keys(states);
+const dbConfig = {
+  source: 'auction',
+  stats: {
+    collection: 'stats',
+    doc: formattedDate,
+  },
+  states: {
+    collection: 'states',
+    doc: formattedDate,
+  },
+};
+
+const getRandomState = subsetOfStates => {
+  const keys = Object.keys( subsetOfStates );
   const keysLength = keys.length;
   const keysAvail = keysLength - 1;
   const targetKey = _.random( keysAvail );
-  states[targetKey].isCurrent = true;
-  return states;
+  const out = keys[ targetKey ];
+  return out; // 'WV'
 }
 
 const runCluster = async statesInQueue => {
@@ -76,17 +98,16 @@ const runCluster = async statesInQueue => {
     console.log(`Error crawling ${data}: ${err.message}`);
   });
   
-  const keys = Object.keys(statesInQueue);
+  const keys = Object.keys( statesInQueue );
   let i = MAX_STATES_PER_RUN; while(i--) {
-    const state = 'WV'; // 'NY'; // keys[i]; // 
-    const pageNumber = statesInQueue[state].latestPage + PAGE_INCREMENT;
+    const state = keys[i]; // 'WV'; // 'NY'; // 
+    const pageNumber = statesInQueue[state].pagesAttempted + PAGE_INCREMENT;
     const jMax = pageNumber + MAX_PAGES_PER_STATE_PER_RUN;
     for( j = pageNumber; j < jMax; j++ ) {
       const item = { state, pageNumber: j, };
+      console.log('item', item,);
       // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
-      await cluster.queue( item, auctionList, );
-      // const scrape = await cluster.queue( item, auctionList, );
-      // console.log('scrape', scrape,); // undefined
+      cluster.queue( item, auctionList, );
     }
   }
 
@@ -98,38 +119,55 @@ const runCluster = async statesInQueue => {
   // schedule it
   // if(!isScheduled(scriptName)) return;
 
-  const statsRef = db.collection('stats').doc(formattedDate);
+  const statesRef = db.collection('states').doc(formattedDate);
   const initDoc = () => {
     const statesInit = getStatesInit();
-    statsRef.set(statesInit);
+    statesRef.set(statesInit);
+    console.log( "Initialized new 'states' for a new day!", formattedDate, );
     // // set queue: list of states not yet scraped
     // // console.log( 'stateAbbreviations', stateAbbreviations, );
-    // statsRef.set({ inQueue: stateAbbreviations, });
+    // statesRef.set({ inQueue: stateAbbreviations, });
   }
   
   db.runTransaction( t => {
-    return t.get( statsRef )
+    return t.get( statesRef )
       .then( doc => {
         // // Add one person to the city population.
         // // Note: this could be done without a transaction
         // //       by updating the population using FieldValue.increment()
         // let newPopulation = doc.data().population + 1;
-        // t.update(statsRef, {population: newPopulation});
+        // t.update(statesRef, {population: newPopulation});
         // node auctionMacro
         const data = doc.data();
-        console.log( 'data', data, );
+        // console.log( 'data', data, );
         // if( !(data && ( 'AL' in data ))) initDoc();
         if( data === undefined ) initDoc();
         else {
           // determine which states need to be run
-          // const statesInQueue = data;
-          const statesInQueue = _.pickBy( data, 'isActive', );
-          // const statesActive = _.pickBy( data, 'isActive', );
-          // if(_.isEmpty(statesActive)) return;
-          // let statesInQueue = _.pickBy( statesActive, 'isCurrent', );
-          // if(_.isEmpty(statesInQueue)) addNewCurrentState(statesActive);
-          // // run those states
-          runCluster( statesInQueue );
+          
+          // active
+          const activeStates = _.pickBy( data, 'isActive', );
+          if(_.isEmpty(activeStates)) return;
+          
+          // current
+          const currentStates = _.pickBy( activeStates, 'isCurrent', );
+          if(_.isEmpty(currentStates)) {
+            const newCurrentState = getRandomState(activeStates);
+            const states = {};
+            states[newCurrentState] = {
+              isCurrent: true,
+            };
+            const stats = {
+              statesAttempted: incrementer.increment(1),
+            }
+            write2db({ dbConfig, data: { states, stats, }, });
+            console.log('Updated new current state:', newCurrentState,);
+            return;
+          };
+
+          // run those states
+          console.log( 'currentStates', currentStates, );
+          runCluster( currentStates );
         }
       });
   }).then( result => {

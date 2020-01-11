@@ -14,6 +14,12 @@ const isScheduled = require('../../util/scheduler');
 // const fs = require('file-system');
 // const ObjectsToCsv = require('objects-to-csv'); // uninstalled // alternative to: https://www.npmjs.com/package/json2csv
 
+// increment counters
+// ref: https://firebase.google.com/docs/firestore/manage-data/add-data#increment_a_numeric_value
+// ref: https://fireship.io/snippets/firestore-increment-tips/
+const admin = require('firebase-admin');
+const incrementer = admin.firestore.FieldValue;
+
 // called by auctionMacro.js
 const scriptName = 'auctionList';
 
@@ -28,6 +34,10 @@ const dbConfig = {
   inventoryList: {
     collection: 'inventory',
     // doc: getLocationIndex(config), // 'us-va-virginia-beach'
+  },
+  states: {
+    collection: 'states',
+    doc: formattedDate,
   },
   stats: {
     collection: 'stats',
@@ -109,7 +119,7 @@ const pageFunction = items => {
   const joiner = ' ';
   const defaultValue = 'N/A';
   const container = 'div[class^="styles__asset-container"]';
-  const configSelectors = {
+  const subSelectors = {
     // listDetailUrlSelector: , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
     listAddress         : 'h4[data-elm-id$="_address_content_1"]'            , // 170 GROVE PARK CIRCLE
     listCsz             : 'label[data-elm-id$="_address_content_2"]'         , // DANVILLE, VA 24541, Danville city County
@@ -124,11 +134,11 @@ const pageFunction = items => {
     listNoBuyersPremium : 'label[data-elm-id$="_No Buyer\'s Premium_label"]' , // No Buyer's Premium
     listVacant          : 'label[data-elm-id$="_Vacant_label"]'              , // Vacant
   };
-  const keys = Object.keys( configSelectors );
+  const keys = Object.keys( subSelectors );
   const result = items.map( item => {
     const out = { listDetailUrl: ( item.href || defaultValue )};
     keys.forEach( key => {
-      const qSel = [ container, configSelectors[key], ].join(joiner);
+      const qSel = [ container, subSelectors[key], ].join(joiner);
       const itemQSel = item.querySelector(qSel);
       out[key] = (itemQSel && itemQSel.innerText.trim()) || defaultValue;
     })
@@ -137,7 +147,7 @@ const pageFunction = items => {
   return result;
 }
 
-const doWriteOut = ( formattedItems, stats, ) => {
+const doWriteOut = ( formattedItems, states, stats, ) => {
   // write to GAS
   if ( isWrite2gas ){
     const itemsAsCsv = arrayOfObjects2csv(formattedItems);
@@ -147,7 +157,7 @@ const doWriteOut = ( formattedItems, stats, ) => {
   // write to firestore db
   if ( isWrite2db ){
     const data = {
-      stats, inventoryList: formattedItems,
+      stats, states, inventoryList: formattedItems,
     };
     write2db({ dbConfig, data, });
   }
@@ -429,6 +439,22 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   // console.log('url', url,); return;
   // // const market = [ 'us', state, ].join(joiner).toLowerCase();
   await page.goto( url, options, );
+
+  // handle errors
+  // ref: https://github.com/puppeteer/puppeteer/issues/1030#issuecomment-336631036
+  // Error 503 Site temporarily unavailable
+  // happens during scheduled maintenance; e.g., friday evening
+  const ready = true;
+  page.on( 'error', err => {
+    ready = false;
+    console.log( 'error:', err, );
+  });
+  page.on('pageerror', pageerr => {
+    ready = false;
+    console.log( 'pageerror occurred:', pageerr, );
+  });
+  if( !ready ) return;
+
   const items = await page.$$eval( selector, pageFunction, );
  
   // console.log( 'items\n'       , items        , );
@@ -442,14 +468,28 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
 
   // callback
   const itemsCount = items.length;
-  // const currentItems = formattedItems.length;
-  // const out = { state, pageNumber, itemsCount, currentItems, };
-  // console.log('out', out,);
-  // return out;
-  const stats = {};
-  stats[state] = { latestPage: pageNumber, };
-  if(!itemsCount) stats[state].isActive = stats[state].isCurrent = false; // encountered page with no data
-  doWriteOut( formattedItems, stats, );
+  const currentItems = formattedItems.filter(Boolean).length;
+  const stats = {
+    pagesAttempted: incrementer.increment(1),
+  };
+  const states = {};
+  states[state] = {
+    pagesAttempted: incrementer.increment(1),
+  };
+  if( itemsCount ) {
+    // items found on page
+    stats         .pagesCount   = incrementer.increment(1);
+    states[state] .pagesCount   = incrementer.increment(1);
+    stats         .itemsCount   = incrementer.increment(itemsCount);
+    states[state] .itemsCount   = incrementer.increment(itemsCount);
+    stats         .currentItems = incrementer.increment(currentItems);
+    states[state] .currentItems = incrementer.increment(currentItems);
+  } else {
+    // no items found on page
+    states[state].isActive  = false; // encountered page with no data
+    states[state].isCurrent = false; // encountered page with no data
+  }
+  doWriteOut( formattedItems, states, stats, );
 };
 
 // node scrape.js

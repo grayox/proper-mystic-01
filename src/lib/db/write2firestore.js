@@ -28,6 +28,7 @@ module.exports = async ({
     parsedUrls=false,
     // source: 'auction'
     inventoryList=false,
+    states=false,
     stats=false,
     // source: 'form'
     formList=false,
@@ -74,16 +75,28 @@ module.exports = async ({
 
   if(source === 'auction') {
     // for sourcing inventory
-    inventoryList.forEach( item => {
-      // console.log('item', item,);
-      // skip entries that are not current; item === false per auctionList.js
-      const ready1 = !!item;
-      if(!ready1) return;
-      const inventoryRef = db
-        .collection(dbConfig.inventoryList.collection) // 'inventory'
-        .doc(item.listDetailUrl.split(slash).slice(-1)[0]); // '255-county-club-drive-eden-nc-27288-2850751-e_13836' < 'https://www.auction.com/details/255-county-club-drive-eden-nc-27288-2850751-e_13836'
-      batch.set( inventoryRef, item, merge, );
-    });
+
+    if( inventoryList && Array.isArray(inventoryList) ) {
+      inventoryList.forEach( item => {
+        // console.log('item', item,);
+        // skip entries that are not current; item === false per auctionList.js
+        const ready1 = !!item;
+        if(!ready1) return;
+        const inventoryRef = db
+          .collection(dbConfig.inventoryList.collection) // 'inventory'
+          .doc(item.listDetailUrl.split(slash).slice(-1)[0]); // '255-county-club-drive-eden-nc-27288-2850751-e_13836' < 'https://www.auction.com/details/255-county-club-drive-eden-nc-27288-2850751-e_13836'
+        batch.set( inventoryRef, item, merge, );
+      });
+    }
+
+    if( states ) {
+      console.log('states', states,);
+      const statesRef = db
+        .collection(dbConfig.states.collection) // 'states'
+        .doc(dbConfig.states.doc); // 2020-01-19
+      batch.set( statesRef, states, merge, );
+    }
+
     if( stats ) {
       console.log('stats', stats,);
       const statsRef = db
@@ -91,6 +104,7 @@ module.exports = async ({
         .doc(dbConfig.stats.doc); // 2020-01-19
       batch.set( statsRef, stats, merge, );
     }
+
   }
 
   if(source === 'form') {
