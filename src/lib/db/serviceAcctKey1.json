@@ -1,0 +1,14 @@
+{
+  "to_replace": "https://console.cloud.google.com/apis/credentials?project=q-reports-ef525 > Credentials > Service account key > Datastore",
+  "comment": "to replace credentials, navigate to above url then follow the indicated click paths",
+  "type": "service_account",
+  "project_id": "q-reports-ef525",
+  "private_key_id": "34b81efe93b2f97820590c529e0ee968a1d27210",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDxRkIsPavGSimF\nd0ea/FEe5m5TulLOL+lIG/YnNijOZNb4W2QvDWqw4CIItQmqVBTmdmSx8wDqLyd8\nd2z/Rzimt/a2RkE6CUf8X4uWkOBus2KQFUcQ03beskXho9P2L6/8NKGZ+C4lOPQT\nZFurP5eoTQS9UpoIHG9rwAH75ml/NpTIZMULHL7yRttzBEX67OU/m/FgJaUQZXZd\nbGWSJ8wYtnBeAheLNFTdIMjbxs51UCckQHdWWY0ul1F5tyiC2SpPR6VzJnw7ocLp\nQ4TqygUYF74qS2oarlqvLU7VW9O5tGCD9IyQtAYEl6NgIrMvP3eV4Gx9EM6NcI6V\n5pMy2La/AgMBAAECggEARwycgfCrO9os/fuRH4e7z7Clvow4xDUBqlVpmERvoc+6\nKiqnht+Zknp+Kzg8n2bhPLiSkIBxvYSjSRjWBRqRCS9VPHnVzWRcSWpNbco9/Ptg\nQ/OwGLlc4Nl4kKiwy2dhmJBbIj8eP6HU5j0AbZ5tZ4c+pQ3FBCxzdzR0oRxJ5sa2\ngqKI0MqMUvucEyS3OqaUug2qy87zSX6qZHTbN8+gUbd8aDsd75Y//v+E/rdOaxBI\nrRyprBGZwIBWcJ4xrltX0AlL7DVysKYTTExWQTOoAoZwYE2x5p/oDUX5QND9yjHr\nemJD3CaA02/hog/x69TXTRAuX+ZZMZdwKURL2233CQKBgQD+LDRkaqWM6Soa7JOm\nmH7ahXfhWO7uXN8Jkp0JpUEBlAwfqsx9wK4989k2t1nPaQEuE55P3VQTT7CPTw9H\n4oKs4JNgKyU6jUoTMEDR5XPlRrKD24ntW4CwQfYsS7993dQ4XQsc3EySDSxe14i1\ngs8HoqqlYn5k8SjYKODrD1RdfQKBgQDzAlCr7XNSEDkjZFoROCTNGmLSLkThHduB\n/Ovvoobv2r557mP8a3ph0Kcr3dNmWboC2WgwdOfYNacj/wF3AOtmX3l+hqneVrDh\na+Sez6rsmYEZRKI7fgluIpYlCL0UFr/O2TItks/+iGU3zM1aW9FtwzlyQpvy49zT\nuACxrguJ6wKBgAK4+n6w3cEapkbPje1U6NbyYwxY5YZMHF9/4Iq/6GhZ659TNwmJ\nzNQBDqyVXjLojwitUR7N4h6q1dtTH3jHplqvtSRskeOEq+x0sd0NtiYYkcTzzxBp\n0IES0845qX1xqNpJtNrESVWvKnCBooc/NXSBe4519aCjLKrUFUSvT1oJAoGBAOuj\nOhCM7r8LhixgecmqtFzCEkMWpKnZ5ulUFIBJDCl25i6b0A6LNZ+10PSDZCMiLHHo\n2NPr+Ii59fm8o3H+zUR2nfvnnr4/N8NOeODaJDbK3tleqSWhIInQNeFxaM8bBCES\nkUqJyvBY2DVUfWf6EskpfgHivw+2joIqMVoZl4zDAoGAJKwh7JNoR1g3GtSdaCnj\njzqfZadgC7VoQtXlopM71prEMT9/8S6K2nnRhOseSxI51Sy9w4r03c5caTGYU+BT\nVxoIpXxPIpUa+U2CjLL1Q+HmstR1hOzO5zic+Z5HBknnlfF+i3ez8pp3X5jO/xNY\nYgakXVznP4L2/bPzuHOy+lc=\n-----END PRIVATE KEY-----\n",
+  "client_email": "datastore@q-reports-ef525.iam.gserviceaccount.com",
+  "client_id": "114247639225561339067",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/datastore%40q-reports-ef525.iam.gserviceaccount.com"
+}

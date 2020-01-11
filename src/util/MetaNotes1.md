@@ -9,6 +9,11 @@
   git commit -m "update"
   git push heroku master
   git add . && git commit -m "update" && git push heroku master
+  <!-- error notes -->
+  "fatal: not a git repository (or any of the parent directories): .git"
+  solution: cd puppeteer
+  explanation: most likely in the wrong directory. has no .git file.
+  ref: https://stackoverflow.com/a/20413490
   <!-- test tasks -->
   heroku run node auction
   heroku run node google
