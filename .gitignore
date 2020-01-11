@@ -1,1 +1,4 @@
 node_modules
+src/lib/db/serviceAcctKey.json
+src/lib/db/serviceAcctKey1.json
+src/api/config.json
