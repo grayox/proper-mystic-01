@@ -1,4 +1,10 @@
 {
+  "name": "myapp",
+  "description": "a really cool app",
+  "version": "0.1.0",
+  "engines": {
+    "node": "12.10.0"
+  },
   "requires": true,
   "lockfileVersion": 1,
   "dependencies": {

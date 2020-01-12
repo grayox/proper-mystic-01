@@ -1,5 +1,7 @@
 [Load to Heroku](https://dashboard.heroku.com/apps/nuns-playing-monopoly/deploy/heroku-git)
-  <!-- creat app -->
+  <!-- terminal -->
+  puppeteer %
+  <!-- create app -->
   heroku create nuns-playing-monopoly
     heroku create nuns-playing-monopoly --buildpack heroku/nodejs
   heroku buildpacks:set heroku/nodejs
@@ -9,12 +11,25 @@
   git commit -m "update"
   git push heroku master
   git add . && git commit -m "update" && git push heroku master
+  <!-- local test run -->
+  heroku run node src/spiders/clusters/auctionMacro.js
+  <!-- logging (automated cloud runs) -->
+  heroku logs
+  <!-- troubleshooting -->
+  https://devcenter.heroku.com/articles/troubleshooting-node-deploys#don-t-check-in-generated-directories
   <!-- error notes -->
-  "fatal: not a git repository (or any of the parent directories): .git"
+  Error: "fatal: not a git repository (or any of the parent directories): .git"
   solution: cd puppeteer
   explanation: most likely in the wrong directory. has no .git file.
   ref: https://stackoverflow.com/a/20413490
-  <!-- test tasks -->
+  <!-- error notes -->
+  Error: "Cannot find module 'foobar'"
+  solution: heroku config:set NODE_MODULES_CACHE=false
+    Next, you should ensure that you aren't accidentally checking your modules into git.
+    Finally, you should check to ensure that your dependencies are correctly listed in package.json.
+  ref: https://help.heroku.com/TO64O3OG/cannot-find-module-in-node-js-at-runtime
+  <!-- tasks -->
+  heroku run node src/spiders/clusters/auctionMacro.js
   heroku run node auction
   heroku run node google
   heroku run node contact
