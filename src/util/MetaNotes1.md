@@ -24,6 +24,15 @@
   ref: https://stackoverflow.com/a/20413490
   <!-- error notes -->
   Error: "Cannot find module 'foobar'"
+  ---
+  rm -rf node_modules
+  # <manually remove node_modules>
+  # <manually remove package-lock.json>
+  npm cache clean # <obsolete>
+  npm cache clean --force
+  npm cache verify
+  npm install
+  ---
   solution: heroku config:set NODE_MODULES_CACHE=false
     Next, you should ensure that you aren't accidentally checking your modules into git.
     Finally, you should check to ensure that your dependencies are correctly listed in package.json.
@@ -36,6 +45,7 @@
   heroku run node formGet
   heroku run node formPost
   <!-- schedule tasks -->
+  automate using Heroku Scheduler add-on using the following command
   <!-- https://devcenter.heroku.com/articles/scheduler -->
   heroku addons:create scheduler:standard
 
