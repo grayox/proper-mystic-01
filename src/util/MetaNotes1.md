@@ -6,6 +6,11 @@
     heroku create nuns-playing-monopoly --buildpack heroku/nodejs
   heroku buildpacks:set heroku/nodejs
     heroku buildpacks:remove heroku/nodejs
+  <!-- enable buildpacks for puppeteer compatible with heroku -->
+  # ref: https://stackoverflow.com/a/55090914
+  heroku buildpacks:clear
+  heroku buildpacks:add --index 1 https://github.com/jontewks/puppeteer-heroku-buildpack
+  heroku buildpacks:add --index 1 heroku/nodejs
   <!-- deploy app -->
   git add .
   git commit -m "update"
@@ -13,6 +18,16 @@
   git add . && git commit -m "update" && git push heroku master
   <!-- local test run -->
   heroku run node src/spiders/clusters/auctionMacro.js
+  <!-- kill switch to stop running processes -->
+  heroku maintenance:on
+    # then later...
+  heroku maintenance:off
+    # ref: https://stackoverflow.com/a/2853899
+    # also, there is: settings > maintenance mode
+  <!-- for non-web apps with no Procfile -->
+  heroku scale web=0 # prevent startup using `npm start`
+  heroku scale web=0 worker=1
+  ref: https://devcenter.heroku.com/articles/nodejs-support#default-web-process-type
   <!-- logging (automated cloud runs) -->
   heroku logs
   <!-- troubleshooting -->

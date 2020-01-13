@@ -33,10 +33,15 @@ const scriptName = 'auctionMacro'; // node auctionMacro
 const MAX_STATES_PER_RUN = 1;
 const MAX_PAGES_PER_STATE_PER_RUN = 5; // 1;
 const MAX_CONCURRENCY = 5;
-// const options = { 
-//   slowMo: 1000,
-//   // headless: false,
-// };
+const puppeteerOptions = { 
+  // slowMo: 1000,
+  // headless: false,
+  // enable heroku // ref: https://stackoverflow.com/a/55090914
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+  ],
+};
 const stateInitObject = {
   isActive: true, // all states not yet scraped today
   isCurrent: false, // current state to scrape
@@ -90,7 +95,7 @@ const runCluster = async statesInQueue => {
     maxConcurrency: MAX_CONCURRENCY,
     monitor: true,
     // timeout: 30000, // 30000 default
-    // puppeteerOptions: slowDown,
+    puppeteerOptions,
   });
 
   // In case of problems, log them
