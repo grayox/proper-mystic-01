@@ -136,7 +136,7 @@ const runCluster = async statesInQueue => {
   
   db.runTransaction( t => {
     return t.get( statesRef )
-      .then( doc => {
+      .then( async doc => {
         // // Add one person to the city population.
         // // Note: this could be done without a transaction
         // //       by updating the population using FieldValue.increment()
@@ -165,9 +165,9 @@ const runCluster = async statesInQueue => {
             const stats = {
               statesAttempted: incrementer.increment(1),
             }
-            write2db({ dbConfig, data: { states, stats, }, });
+            await write2db({ dbConfig, data: { states, stats, }, });
             console.log('Updated new current state:', newCurrentState,);
-            return;
+            // return;
           };
 
           // run those states
