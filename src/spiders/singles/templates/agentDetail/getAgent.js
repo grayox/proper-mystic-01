@@ -1,4 +1,4 @@
-const getAgent = require('./detail');
+const getAgent = require('./getDetail');
 
 // script name: getAgent.js
 

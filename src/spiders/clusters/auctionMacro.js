@@ -36,8 +36,8 @@ const MAX_CONCURRENCY = 5;
 const puppeteerOptions = { 
   // slowMo: 1000,
   // headless: false,
-  // enable heroku // ref: https://stackoverflow.com/a/55090914
   args: [
+    // support Heroku dynos // ref: https://stackoverflow.com/a/55090914
     '--no-sandbox',
     '--disable-setuid-sandbox',
   ],
@@ -95,7 +95,7 @@ const runCluster = async statesInQueue => {
     maxConcurrency: MAX_CONCURRENCY,
     monitor: true,
     // timeout: 30000, // 30000 default
-    puppeteerOptions,
+    puppeteerOptions, // support Heroku dynos
   });
 
   // In case of problems, log them

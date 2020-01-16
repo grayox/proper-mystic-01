@@ -13,9 +13,11 @@ const options = {
 
 // const run = () =>
 module.exports = ({ source, term, city, state, zip, county, }) =>
-  new Promise(async ( resolve, reject, ) => {
+  new Promise( async ( resolve, reject, ) => {
     try {
-
+      // console.log('config', config,);
+      // console.log( source, term, city, state, zip, county, );
+  
       // destructure and assign
       configSource = config[source];
       const { getUrl, iframe, select, type, click, recaptcha, } = configSource;
