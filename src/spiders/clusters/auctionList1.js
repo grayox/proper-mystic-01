@@ -85,25 +85,9 @@ const getIsCurrent = (listAuctionDateDay, listAuctionDateMonthNumber, listAuctio
   const sameMonth = ( listAuctionDateMonthNumber === todaysMonthOneIndex );
   const sameYear  = ( listAuctionDateYear        === todaysYear          );
   const out = ( sameDay && sameMonth && sameYear );
-  // console.log('isCurrent', out,);
+  console.log('isCurrent', out,);
   return out;
 }
-
-const isWrite2db = false; //true;
-const isWrite2gas = false;
-const source = 'auction.com';
-const options = {
-  timeout: 45000, // default: 30000; 0 turns it off
-  waitUntil: 'load',
-};
-const commaSpace = ', ';
-const singleSpace = ' ';
-// const allCommas = /,*/g;
-const nonDigits = /\D*/g;
-const currencyChars = /(\$*,*)/g;
-// const joiner = '-';
-const emptyString = '';
-const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
 
 const getUrl = ( state, pageNumber = 1, ) =>
   `https://www.auction.com/residential/${state}/active_lt/resi_sort_v2_st/y_sr/${pageNumber}_cp/y_nbs/`;
@@ -114,10 +98,28 @@ const getUrl = ( state, pageNumber = 1, ) =>
   // page 2   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/2_cp/y_nbs/'
   // page 3   // 'https://www.auction.com/residential/CA/active_lt/resi_sort_v2_st/y_sr/3_cp/y_nbs/'
 
-const config = {
-  selector: 'div[data-elm-id="asset_list_content"] a',
-  container: 'div[class^="styles__asset-container"]',
-  subSelectors: {
+const isWrite2db = true;
+const isWrite2gas = false;
+const source = 'auction.com';
+const options = {
+  timeout: 45000, // default: 30000; 0 turns it off
+  waitUntil: 'load',
+};
+const singleSpace = ' ';
+const commaSpace = ', ';
+// const allCommas = /,*/g;
+const nonDigits = /\D*/g;
+const currencyChars = /(\$*,*)/g;
+// const joiner = '-';
+const emptyString = '';
+const defaultResult = null; // useful for writing to firestore // 'N/A'; // useful when writing to GAS
+
+const selector = 'div[data-elm-id="asset_list_content"] a';
+const pageFunction = items => {
+  const joiner = ' ';
+  const defaultValue = 'N/A';
+  const container = 'div[class^="styles__asset-container"]';
+  const subSelectors = {
     // listDetailUrlSelector: , // /details/291-turpin-st-danville-va-24541-2871813-e_13953a
     listAddress         : 'h4[data-elm-id$="_address_content_1"]'            , // 170 GROVE PARK CIRCLE
     listCsz             : 'label[data-elm-id$="_address_content_2"]'         , // DANVILLE, VA 24541, Danville city County
@@ -131,22 +133,15 @@ const config = {
     listOpeningBid      : 'h4[data-elm-id="label_starting_bid_value"]'       , // $25,000
     listNoBuyersPremium : 'label[data-elm-id$="_No Buyer\'s Premium_label"]' , // No Buyer's Premium
     listVacant          : 'label[data-elm-id$="_Vacant_label"]'              , // Vacant
-  },
-};
-
-const pageFunction = ( items, { container, subSelectors, }, ) => {
-  const joiner = ' ';
-  const defaultValue = 'N/A';
-  // const keys = Object.keys( subSelectors );
+  };
+  const keys = Object.keys( subSelectors );
   const result = items.map( item => {
     const out = { listDetailUrl: ( item.href || defaultValue )};
-    // keys.forEach( key => {
-    for(const key in subSelectors) {
+    keys.forEach( key => {
       const qSel = [ container, subSelectors[key], ].join(joiner);
       const itemQSel = item.querySelector(qSel);
       out[key] = (itemQSel && itemQSel.innerText.trim()) || defaultValue;
-    }
-    // })
+    })
     return out;
   });
   return result;
@@ -158,8 +153,6 @@ const doWriteOut = ( formattedItems, states, stats, ) => {
     const itemsAsCsv = arrayOfObjects2csv(formattedItems);
     // console.log('itemsAsCsv\n', itemsAsCsv,);
     write2gas(itemsAsCsv);
-  } else {
-    console.log('Would have written to GAS:', formattedItems,);
   }
   // write to firestore db
   if ( isWrite2db ){
@@ -167,11 +160,6 @@ const doWriteOut = ( formattedItems, states, stats, ) => {
       stats, states, inventoryList: formattedItems,
     };
     write2db({ dbConfig, data, });
-  } else {
-    console.log( 'Would have written to DB:');
-    console.log( 'stats'     , stats          , );
-    console.log( 'states'    , states         , );
-    console.log( 'inventory' , formattedItems , );
   }
 };
 
@@ -319,7 +307,6 @@ const formatItems = ( url, items, ) => items.map( item => {
   return isCurrent && out;
 });
 
-// const run = async ( state, pageNumber, ) => {
 module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   console.log('state', state,);
   console.log('pageNumber', pageNumber,);
@@ -447,16 +434,6 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   // });
 
   // const page = await browser.newPage();
-
-  // log
-  // // allow console.log() inside page methods // ref: https://stackoverflow.com/a/46245945
-  // page.on('console', consoleObj => console.log(consoleObj.text()));
-  // augment above to filter warnings // ref: https://stackoverflow.com/a/49101258
-  page.on('console', consoleMessageObject =>
-    (consoleMessageObject._type === 'log') ? // 'error', 'warning'
-    console.debug(consoleMessageObject._text) : null
-  );
-
   // await page.goto('https://example.com');
   const url = getUrl( state, pageNumber, );
   // console.log('url', url,); return;
@@ -478,7 +455,7 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   });
   if( !ready ) return;
 
-  const items = await page.$$eval( config.selector, pageFunction, config, );
+  const items = await page.$$eval( selector, pageFunction, );
  
   // console.log( 'items\n'       , items        , );
   // console.log( 'items count: ' , items.length , );
@@ -514,7 +491,6 @@ module.exports = async ({ page, data: { state, pageNumber, }, }) => {
   }
   doWriteOut( formattedItems, states, stats, );
 };
-// run('ny', 1);
 
 // node scrape.js
 // curl -L --data-binary @data/scrape.csv https://script.google.com/macros/s/AKfycbyRT8_eiROa8oCVEQV0nX2bQpxcA4b9Eq2zGpp2LNW0p4ue37_G/exec

@@ -1,9 +1,5 @@
 const config = require('./config.json');
-// const got = require('got'); // npm install request --save
 const request = require('request'); // npm i request -s
-// const req = require('request'); // npm i request -s
-// const { promisfy } = require('util');
-// const request = promisfy(req.get); 
 
 const formatTerm = term => {
   const splitter = ' ';
@@ -28,42 +24,23 @@ const getUrl = ( city, state, term, ) => {
 // url
 
 module.exports = async ({ city, state, term, }) => {
-  let out;
   const url = getUrl( city, state, term, );
-  // request
   const options = {
     json: true,
     auth: {
       bearer: config.yelp.apiKey,
     },
   };
-  // // got
-  // const options = {
-  //   bearer: config.yelp.apiKey,
-  // };
-  // request.get( config.yelp.businesses, {
-  // await request.get( url, options,
-  // const result = await request.get( url, options,
   const result = await new Promise(( resolve, reject, ) => {
-    // const result = await got( url, options,
     request.get( url, options, ( error, response, body, ) => {
-      if (error) {
-        // return console.error( 'Upload failed:', error, );
-        console.error( 'Upload failed:', error, );
-        reject ( error );
+      if( error ) {
+        console.error( 'Query failed:', error, );
+        reject( error );
       }
-      // console.log( 'response', response, );
-      // console.log( 'body', body, );
-      // result = body;
-      // return body;
-      // out = JSON.parse(body);
-      // return JSON.parse(body);
-      resolve ( body );
-    })
+      resolve( body );
+    });
   });
-  console.log( 'result', result, );
-  console.log( 'typeof result', typeof result, );
+  // console.log( 'result', result, );
+  // console.log( 'typeof result', typeof result, );
   return result;
-  // // console.log( 'out', out, );
-  // return out;
 }

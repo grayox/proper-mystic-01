@@ -147,7 +147,7 @@ const pageFunction = items => { // items.length;
   //   console.log(`Page title of ${url} is ${pageTitle}`);
   // });
   // Extract a.hrefs of the crawled pages
-  await cluster.task(async ({ page, data: url }) => {
+  await cluster.task(async ({ page, data: url, }) => {
     await page.goto( url, waiter, );
     // const pageTitle = await page.evaluate(() => document.title);
     // const values = await page.$$eval( selector, items => items.length, );

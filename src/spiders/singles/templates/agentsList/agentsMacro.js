@@ -44,15 +44,7 @@ const puppeteerOptions = {
   ],
 };
 const term = 'real estate agents';
-const sources = [ 'yelp', 'bpo', 'hud', 'homePath', 'realtor', 'yellow', ];
-const stateInitObject = {
-  isActive: true, // all states not yet scraped today
-  isCurrent: false, // current state to scrape
-  pagesAttempted: 0, // total pages attempted to be scraped
-  pagesCount: 0, // total count of pages with data we successfully captured
-  itemsCount: 0, // total number of items captured from pages with data
-  currentItems: 0, // total number of captured items that are current
-};
+const sources = [ 'homePath', ]; // 'yelp', 'realtor', 'yellow', 'hud', 'bpo', 
 
 // // do not change
 // const PAGE_INCREMENT = 1;
@@ -165,18 +157,18 @@ const getTargetProperty = async () => {
   // schedule it
   // if(!isScheduled(scriptName)) return;
 
-  const cluster = await Cluster.launch({
-    concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: MAX_CONCURRENCY,
-    monitor: true,
-    // timeout: 30000, // 30000 default
-    puppeteerOptions, // support Heroku dynos
-  });
+  // const cluster = await Cluster.launch({
+  //   concurrency: Cluster.CONCURRENCY_CONTEXT,
+  //   maxConcurrency: MAX_CONCURRENCY,
+  //   monitor: true,
+  //   // timeout: 30000, // 30000 default
+  //   puppeteerOptions, // support Heroku dynos
+  // });
 
-  // In case of problems, log them
-  cluster.on('taskerror', ( err, data, ) => {
-    console.log(`Error crawling ${data}: ${err.message}`);
-  });
+  // // In case of problems, log them
+  // cluster.on('taskerror', ( err, data, ) => {
+  //   console.log(`Error crawling ${data}: ${err.message}`);
+  // });
   
   const queryTargetProperty = await getTargetProperty();
   // console.log( 'queryTargetProperty', queryTargetProperty, );
@@ -195,9 +187,10 @@ const getTargetProperty = async () => {
     const source = sources[i];
     config.source = source;
     // console.log('config', config,);
-    cluster.queue( config, getAgents, ); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
+    // cluster.queue( config, getAgents, ); // ref: https://github.com/thomasdondorf/puppeteer-cluster/blob/master/examples/function-queuing-complex.js
+    getAgents(config);
   }
 
-  await cluster.idle();
-  await cluster.close();
+  // await cluster.idle();
+  // await cluster.close();
 })();

@@ -223,6 +223,7 @@ const yellow = {
     },
   },
   // url: 'https://www.yellowpages.com/search?search_terms=Real+Estate+Agents&geo_location_terms=High+Point%2C+NC',
+  // url: 'https://www.yellowpages.com/search?search_terms=real-estate-agents&geo_location_terms=Woodhaven-NY',
   // url: 'https://www.yellowpages.com/richmond-va/real-estate-agents',
   getUrl: ({ city, state, term, }) => {
     const stem = 'https://www.yellowpages.com';
