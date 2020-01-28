@@ -27,7 +27,7 @@ const admin = require('firebase-admin');
 const incrementer = admin.firestore.FieldValue;
 
 // start here
-const scriptName = 'auctionMacro'; // node auctionMacro
+// const scriptName = 'byState'; // node byState
 // calls auctionList.js
 
 const MAX_STATES_PER_RUN = 1;
